@@ -13,12 +13,12 @@ int compatible(function *f1, size_t a, function *f2, size_t b, size_t *sh) {
 	return 1;
 }
 
-value max(row **rows, size_t i, size_t j) {
+row *max(row **rows, size_t i, size_t j) {
 
-	value max = rows[i]->v;
+	row *max = rows[i];
 
 	for (; i < j; i++)
-		if (rows[i]->v > max) max = rows[i]->v;
+		if (rows[i]->v > max->v) max = rows[i];
 
 	return max;
 }
@@ -46,6 +46,10 @@ void subtract(function *f, value v) {
 
 void nuke(function *f) {
 
+#if MEMORY_MESSAGES > 0
+	printf("[MEMORY] About to free %zu bytes\n", size(f));
+#endif
+
 	size_t i;
 
 	for (i = 0; i < f->m; i++)
@@ -62,7 +66,7 @@ void nuke(function *f) {
 
 size_t size(function *f) {
 
-	return 0;
+	return sizeof(function) + f->r * (sizeof(row *) + sizeof(row) + f->m * sizeof(row_block)) + f->m * f->n * sizeof(agent *);
 }
 
 int main(int argc, char *argv[]) {
@@ -168,12 +172,12 @@ int main(int argc, char *argv[]) {
 
 	a2->pf = a2->luf;
 	compute_payment(a2);
-	a2msg = maximize(a2->pf, a2->l);
+	a2msg = maximize(a2);
 	subtract(a2msg, a2->payment);
 
 	a1->pf = joint_sum(a1->luf, a2msg);
 	compute_payment(a1);
-	a1msg = maximize(a1->pf, a1->l);
+	a1msg = maximize(a1);
 	subtract(a1msg, a1->payment);
 
 	a0->pf = joint_sum(a0->luf, a1msg);
@@ -187,8 +191,7 @@ int main(int argc, char *argv[]) {
 	nuke(a1->luf);
 	nuke(a2->luf);
 
-	printf("A0 Payment = %f\nA1 Payment = %f\nA2 Payment = %f\n", a0->payment, a1->payment, a2->payment);
-	printf("Niente segmentation fault, l'avaressito mai dito?\n");
+	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
 
 	return 0;
 }

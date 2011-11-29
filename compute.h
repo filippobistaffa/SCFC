@@ -24,7 +24,16 @@ struct max_data {
 	size_t i, j;
 };
 
+
+struct arg_data {
+
+	row **row;
+	value *max;
+	pthread_mutex_t *m;
+};
+
 void *compute_shift(void *d);
+void *compute_arg_max(void *d);
 void *compute_maximize(void *d);
 void *compute_joint_sum(void *d);
 

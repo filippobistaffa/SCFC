@@ -49,9 +49,10 @@ struct function {
 int compatible(function *f1, size_t a, function *f2, size_t b, size_t *shared);
 int compare_rows(const void *a, const void *b);
 
-value max(row **rows, size_t i, size_t j);
+row *max(row **rows, size_t i, size_t j);
 
 void subtract(function *f, value v);
 void nuke(function *f);
+size_t size(function *f);
 
 #endif /* FUNCTION_H_ */

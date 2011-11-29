@@ -20,7 +20,7 @@ void *compute_maximize(void *d) {
 	row *row = malloc(sizeof(row));
 
 	row->m = data->f->m;
-	row->v = max(data->rows, data->i, data->j);
+	row->v = max(data->rows, data->i, data->j)->v;
 	row->blocks = malloc(data->f->m * (data->f->c / 8));
 	memcpy(row->blocks, data->rows[data->i]->blocks, data->f->m * (data->f->c / 8));
 

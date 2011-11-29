@@ -50,8 +50,8 @@ function *joint_sum(function *f1, function *f2) {
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 
-#if ECHO > 0
-	printf("[Sum] Using blocks of %zu threads\n", t);
+#if THREAD_MESSAGES > 0
+	printf("[SUM] Using blocks of %zu threads\n", t);
 #endif
 
 	sum_data *data[t];
@@ -69,15 +69,15 @@ function *joint_sum(function *f1, function *f2) {
 
 		if (i + 1 == f1->r || j == t) {
 			if (i + 1 > t) {
-#if ECHO > 0
-				printf("[Sum] Waiting for %zu threads to finish\n", t);
+#if THREAD_MESSAGES > 0
+				printf("[SUM] Waiting for %zu threads to finish\n", t);
 #endif
 				for (k = 0; k < t; k++)
 					pthread_join(threads[k], &status);
 			}
 
-#if ECHO > 0
-			printf("[Sum] Starting %zu new threads\n", j);
+#if THREAD_MESSAGES > 0
+			printf("[SUM] Starting %zu new threads\n", j);
 #endif
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_joint_sum, data[k]);
@@ -86,8 +86,8 @@ function *joint_sum(function *f1, function *f2) {
 		}
 	}
 
-#if ECHO > 0
-	printf("[Sum] Waiting for the final %zu threads to finish\n", j);
+#if THREAD_MESSAGES > 0
+	printf("[SUM] Waiting for the final %zu threads to finish\n", j);
 #endif
 
 	for (k = 0; k < j; k++)
@@ -96,16 +96,25 @@ function *joint_sum(function *f1, function *f2) {
 	pthread_mutex_destroy(&mutex);
 
 	sum->rows = realloc(sum->rows, sum->r * sizeof(row *));
+
+#if MEMORY_MESSAGES > 0
+	printf("[MEMORY] Sum function dimension = %zu bytes\n", size(sum));
+#endif
+
 	return sum;
 }
 
-function *maximize(function *f, size_t l) {
+function *maximize(agent *a) {
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;37m[A%zu] Creating demand message\033[m\n", a->id);
+#endif
 
 	function *max = malloc(sizeof(function));
 
 	max->r = 0;
-	max->c = f->c;
-	max->n = f->n - l;
+	max->c = a->pf->c;
+	max->n = a->pf->n - a->l;
 	max->m = CEIL((float) max->n / max->c);
 	max->vars = calloc(max->m, sizeof(agent **));
 
@@ -113,71 +122,71 @@ function *maximize(function *f, size_t l) {
 
 	for (i = 0; i < max->n; i++) {
 		if (!max->vars[i / max->c]) max->vars[i / max->c] = malloc(max->c * sizeof(agent *));
-		VAR(max, i) = VAR(f, i + l);
+		VAR(max, i) = VAR(a->pf, i + a->l);
 	}
 
-	row **rows = malloc(f->r * sizeof(row *));
+	row **rows = malloc(a->pf->r * sizeof(row *));
 
-	for (i = 0; i < f->r; i++) {
+	for (i = 0; i < a->pf->r; i++) {
 		rows[i] = malloc(sizeof(row));
-		rows[i]->m = f->rows[i]->m;
-		rows[i]->v = f->rows[i]->v;
+		rows[i]->m = a->pf->rows[i]->m;
+		rows[i]->v = a->pf->rows[i]->v;
 		rows[i]->blocks = malloc(rows[i]->m * sizeof(row_block));
-		memcpy(rows[i]->blocks, f->rows[i]->blocks, rows[i]->m * sizeof(row_block));
+		memcpy(rows[i]->blocks, a->pf->rows[i]->blocks, rows[i]->m * sizeof(row_block));
 	}
 
 	size_t t = sysconf(_SC_NPROCESSORS_CONF) * THREADS_PER_CORE;
 	pthread_t threads[t];
 	void *status;
 
-#if ECHO > 0
-	printf("[Maximize] Using blocks of %zu threads\n", t);
+#if THREAD_MESSAGES > 0
+	printf("[MAXIMIZE] Using blocks of %zu threads\n", t);
 #endif
 
 	shift_data *s_data[t];
 	j = 0;
 
-	for (i = 0; i < f->r; i++) {
+	for (i = 0; i < a->pf->r; i++) {
 
 		s_data[j] = malloc(sizeof(shift_data));
 		s_data[j]->blocks = rows[i]->blocks;
-		s_data[j]->n = f->n;
-		s_data[j]->l = l;
+		s_data[j]->n = a->pf->n;
+		s_data[j]->l = a->l;
 		j++;
 
-		if (i + 1 == f->r || j == t) {
+		if (i + 1 == a->pf->r || j == t) {
 			if (i + 1 > t) {
-#if ECHO > 0
-				printf("[Left Shift] Waiting for %zu threads to finish\n", t);
+#if THREAD_MESSAGES > 0
+				printf("[SHIFT] Waiting for %zu threads to finish\n", t);
 #endif
 				for (k = 0; k < t; k++)
 					pthread_join(threads[k], &status);
 			}
 
-#if ECHO > 0
-			printf("[Left Shift] Starting %zu new threads\n", j);
+#if THREAD_MESSAGES > 0
+			printf("[SHIFT] Starting %zu new threads\n", j);
 #endif
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_shift, s_data[k]);
 
-			if (i + 1 != f->r) j = 0;
+			if (i + 1 != a->pf->r) j = 0;
 		}
 	}
 
-#if ECHO > 0
-	printf("[Left Shift] Waiting for the final %zu threads to finish\n", j);
+#if THREAD_MESSAGES > 0
+	printf("[SHIFT] Waiting for the final %zu threads to finish\n", j);
 #endif
 
 	for (k = 0; k < j; k++)
 		pthread_join(threads[k], &status);
 
-	qsort(rows, f->r, sizeof(row *), compare_rows);
+	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
 
 	/**
 	 * Upper bound allocating, need to reallocate later
 	 */
 
-	size_t r = f->r;
+	size_t r = a->pf->r;
 	max->rows = malloc(r * sizeof(row *));
 
 	pthread_mutex_t mutex;
@@ -187,9 +196,9 @@ function *maximize(function *f, size_t l) {
 	j = 0;
 	size_t h = 0;
 
-	for (i = 0; i <= f->r; i++) {
+	for (i = 0; i <= a->pf->r; i++) {
 
-		if (!i || (i != f->r && !compare_rows(&(rows[i]), &(rows[i - 1])))) continue;
+		if (!i || (i != a->pf->r && !compare_rows(&(rows[i]), &(rows[i - 1])))) continue;
 
 		m_data[j] = malloc(sizeof(max_data));
 		m_data[j]->rows = rows;
@@ -200,27 +209,27 @@ function *maximize(function *f, size_t l) {
 		h = i;
 		j++;
 
-		if (i == f->r || j == t) {
+		if (i == a->pf->r || j == t) {
 			if (i > t) {
-#if ECHO > 0
-				printf("[Maximize] Waiting for %zu threads to finish\n", t);
+#if THREAD_MESSAGES > 0
+				printf("[MAXIMIZE] Waiting for %zu threads to finish\n", t);
 #endif
 				for (k = 0; k < t; k++)
 					pthread_join(threads[k], &status);
 			}
 
-#if ECHO > 0
-			printf("[Maximize] Starting %zu new threads\n", j);
+#if THREAD_MESSAGES > 0
+			printf("[MAXIMIZE] Starting %zu new threads\n", j);
 #endif
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_maximize, m_data[k]);
 
-			if (i != f->r) j = 0;
+			if (i != a->pf->r) j = 0;
 		}
 	}
 
-#if ECHO > 0
-	printf("[Maximize] Waiting for the final %zu threads to finish\n", j);
+#if THREAD_MESSAGES > 0
+	printf("[MAXIMIZE] Waiting for the final %zu threads to finish\n", j);
 #endif
 
 	for (k = 0; k < j; k++)
@@ -229,11 +238,18 @@ function *maximize(function *f, size_t l) {
 	pthread_mutex_destroy(&mutex);
 	max->rows = realloc(max->rows, max->r * sizeof(row *));
 
-	for (i = 0; i < f->r; i++) {
+	for (i = 0; i < a->pf->r; i++) {
 		free(rows[i]->blocks);
 		free(rows[i]);
 	}
 
 	free(rows);
+
+#if MEMORY_MESSAGES > 0
+	printf("[MEMORY] Max function dimension = %zu bytes\n", size(max));
+#endif
+
 	return max;
 }
+
+function *get_arg_max(agent *a, agent *p);

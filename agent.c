@@ -13,6 +13,10 @@ void free_agent_list(agent_list *h) {
 
 void create_luf(agent *a) {
 
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;37m[A%zu] Creating LUF function\033[m\n", a->id);
+#endif
+
 	size_t i;
 	function *luf = malloc(sizeof(function));
 
@@ -43,10 +47,18 @@ void create_luf(agent *a) {
 			SETBIT(luf->rows[i]->blocks, a->req[i - a->l], luf->c);
 	}
 
+#if MEMORY_MESSAGES > 0
+	printf("[MEMORY] Luf function dimension = %zu bytes\n", size(luf));
+#endif
+
 	a->luf = luf;
 }
 
 void compute_payment(agent *a) {
 
-	a->payment = max(a->pf->rows, 0, a->pf->r);
+	a->payment = max(a->pf->rows, 0, a->pf->r)->v;
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;32m[A%zu] Payment = %f\033[m\n", a->id, a->payment);
+#endif
 }

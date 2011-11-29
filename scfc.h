@@ -3,7 +3,10 @@
 
 #include <stdlib.h>
 
-#define ECHO 1
+#define ALGORITHM_MESSAGES 1
+#define THREAD_MESSAGES 0
+#define MEMORY_MESSAGES 0
+
 #define THREADS_PER_CORE 4
 
 /**
@@ -22,6 +25,7 @@ typedef struct function function;
 typedef struct variable variable;
 typedef struct sum_data sum_data;
 typedef struct max_data max_data;
+typedef struct arg_data arg_data;
 typedef struct shift_data shift_data;
 
 typedef struct agent_list agent_list;
