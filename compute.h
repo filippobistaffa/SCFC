@@ -18,18 +18,19 @@ struct shift_data {
 
 struct max_data {
 
-	row **rows;
-	function *f;
 	pthread_mutex_t *m;
+	function *f;
 	size_t i, j;
+	row **rows;
 };
 
 
 struct arg_data {
 
-	row **row;
-	value *max;
 	pthread_mutex_t *m;
+	row *row, *prow;
+	row **max_row;
+	size_t *sh;
 };
 
 void *compute_shift(void *d);

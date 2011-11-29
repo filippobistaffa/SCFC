@@ -15,6 +15,7 @@ struct agent {
 	variable **vars;
 	size_t *req;
 	value payment;
+	row *assignment;
 };
 
 struct children {

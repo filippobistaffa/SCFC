@@ -4,8 +4,10 @@
 #include "scfc.h"
 #include "compute.h"
 
-function *maximize(agent *a);
+#define THREAD_NUMBER sysconf(_SC_NPROCESSORS_CONF) * THREADS_PER_CORE
+
 function *joint_sum(function *f1, function *f2);
-function *get_arg_max(agent *a, agent *p);
+function *maximize(agent *a);
+void get_arg_max(agent *a);
 
 #endif /* THREADED_H_ */

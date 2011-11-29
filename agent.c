@@ -14,7 +14,7 @@ void free_agent_list(agent_list *h) {
 void create_luf(agent *a) {
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;37m[A%zu] Creating LUF function\033[m\n", a->id);
+	printf("\033[1;37m[ A-%02zu ] Creating LUF Function\033[m\n", a->id);
 #endif
 
 	size_t i;
@@ -22,13 +22,12 @@ void create_luf(agent *a) {
 
 	luf->id = a->id;
 	luf->r = luf->n = a->n;
-	luf->c = sizeof(row_block) * 8;
-	luf->m = CEIL((float) luf->n / luf->c);
+	luf->m = CEIL((float) luf->n / BLOCK_BITSIZE);
 	luf->vars = malloc(luf->m * sizeof(agent **));
 	luf->rows = malloc(luf->r * sizeof(row *));
 
 	for (i = 0; i < luf->m; i++)
-		luf->vars[i] = malloc(luf->c * sizeof(agent *));
+		luf->vars[i] = malloc(BLOCK_BITSIZE * sizeof(agent *));
 
 	for (i = 0; i < a->n; i++)
 		VAR(luf, i) = a->vars[i];
@@ -37,18 +36,19 @@ void create_luf(agent *a) {
 		luf->rows[i] = malloc(sizeof(row));
 		luf->rows[i]->blocks = calloc(luf->m, sizeof(row_block));
 		luf->rows[i]->m = luf->m;
+		luf->rows[i]->n = luf->n;
 	}
 
 	for (i = 0; i < luf->n; i++) {
-		SETBIT(luf->rows[i]->blocks, i, luf->c);
+		SETBIT(luf->rows[i], i);
 		if (i < a->l)
 			luf->rows[i]->v = a->vars[i]->worth;
 		else
-			SETBIT(luf->rows[i]->blocks, a->req[i - a->l], luf->c);
+			SETBIT(luf->rows[i], a->req[i - a->l]);
 	}
 
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] Luf function dimension = %zu bytes\n", size(luf));
+	printf("[MEMORY] LUF Function Dimension = %zu Bytes\n", size(luf));
 #endif
 
 	a->luf = luf;
@@ -56,9 +56,18 @@ void create_luf(agent *a) {
 
 void compute_payment(agent *a) {
 
-	a->payment = max(a->pf->rows, 0, a->pf->r)->v;
+	if (a->p)
+		a->payment = max(a->pf->rows, 0, a->pf->r)->v;
+	else {
+		a->assignment = max(a->pf->rows, 0, a->pf->r);
+		a->payment = a->assignment->v;
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;32m[A%zu] Payment = %f\033[m\n", a->id, a->payment);
+		printf("\033[1;36m[ A-%02zu ] Assignment\033[m\n", a->id);
+#endif
+	}
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;32m[ A-%02zu ] Payment = %f\033[m\n", a->id, a->payment);
 #endif
 }

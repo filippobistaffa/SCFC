@@ -1,14 +1,26 @@
 #include "function.h"
 #include "threaded.h"
 
-int compatible(function *f1, size_t a, function *f2, size_t b, size_t *sh) {
+/*int compatible(function *f1, size_t a, function *f2, size_t b, size_t *sh) {
+
+ if (!sh) return 1;
+
+ size_t i;
+
+ for (i = 0; i < f2->n; i++)
+ if ((sh[i] < f1->n) && (BIT(f1, a, sh[i]) ^ BIT(f2, b, i))) return 0;
+
+ return 1;
+ }*/
+
+int compatible(row *r1, row *r2, size_t *sh) {
 
 	if (!sh) return 1;
 
 	size_t i;
 
-	for (i = 0; i < f2->n; i++)
-		if ((sh[i] < f1->n) && (BIT(f1, a, sh[i]) ^ BIT(f2, b, i))) return 0;
+	for (i = 0; i < r2->n; i++)
+		if ((sh[i] < r1->n) && (GETBIT(r1, sh[i]) ^ GETBIT(r2, i))) return 0;
 
 	return 1;
 }
@@ -47,7 +59,7 @@ void subtract(function *f, value v) {
 void nuke(function *f) {
 
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] About to free %zu bytes\n", size(f));
+	printf("[MEMORY] Free %zu Bytes\n", size(f));
 #endif
 
 	size_t i;
@@ -76,6 +88,10 @@ int main(int argc, char *argv[]) {
 	agent *a0 = malloc(sizeof(agent));
 	agent *a1 = malloc(sizeof(agent));
 	agent *a2 = malloc(sizeof(agent));
+
+	a0->p = NULL;
+	a1->p = a0;
+	a2->p = a1;
 
 	a0->id = 0;
 	a1->id = 1;
@@ -182,6 +198,9 @@ int main(int argc, char *argv[]) {
 
 	a0->pf = joint_sum(a0->luf, a1msg);
 	compute_payment(a0);
+
+	get_arg_max(a1);
+	get_arg_max(a2);
 
 	nuke(a0->pf);
 	nuke(a1->pf);

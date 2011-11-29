@@ -13,10 +13,13 @@
 #include <pthread.h>
 
 #define BITAT(X, I) ((X) >> (I) & 1)
-#define VAR(F, I) ((F)->vars[(I) / (F)->c][(I) % (F)->c])
-#define SETBIT(A, I, B) ((A)[(I) / (B)] |= 1 << ((I) % (B)))
+#define BLOCK_BITSIZE (sizeof(row_block) * 8)
+#define VAR(F, I) ((F)->vars[(I) / BLOCK_BITSIZE][(I) % BLOCK_BITSIZE])
 #define CEIL(X) (X - (size_t)(X) > 0 ? (size_t)(X + 1) : (size_t)(X))
-#define BIT(F, R, C) BITAT((((F)->rows)[R]->blocks)[(C) / (F)->c], (C) % (F)->c)
+
+#define SETBIT(R, I) (((R)->blocks)[(I) / BLOCK_BITSIZE] |= 1 << ((I) % BLOCK_BITSIZE))
+#define GETBIT(R, I) BITAT(((R)->blocks)[(I) / BLOCK_BITSIZE], (I) % BLOCK_BITSIZE)
+//#define BIT(F, R, C) BITAT((((F)->rows)[R]->blocks)[(C) / (F)->c], (C) % (F)->c)
 
 struct variable {
 
@@ -28,25 +31,24 @@ struct variable {
 struct row {
 
 	row_block *blocks;
-	size_t m;
+	size_t n, m;
 	value v;
 };
 
 struct function {
 
 	/**
-	 * s = bits per row block
 	 * n = number of columns / variables
 	 * m = number of row block
 	 * r = number of rows
 	 */
 
-	size_t c, r, n, m, id;
+	size_t r, n, m, id;
 	variable ***vars;
 	row **rows;
 };
 
-int compatible(function *f1, size_t a, function *f2, size_t b, size_t *shared);
+int compatible(row *r1, row *r2, size_t *sh);
 int compare_rows(const void *a, const void *b);
 
 row *max(row **rows, size_t i, size_t j);

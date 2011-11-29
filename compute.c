@@ -17,15 +17,16 @@ void *compute_shift(void *d) {
 void *compute_maximize(void *d) {
 
 	max_data *data = d;
-	row *row = malloc(sizeof(row));
+	row *r = malloc(sizeof(row));
 
-	row->m = data->f->m;
-	row->v = max(data->rows, data->i, data->j)->v;
-	row->blocks = malloc(data->f->m * (data->f->c / 8));
-	memcpy(row->blocks, data->rows[data->i]->blocks, data->f->m * (data->f->c / 8));
+	r->n = data->f->n;
+	r->m = data->f->m;
+	r->v = max(data->rows, data->i, data->j)->v;
+	r->blocks = malloc(data->f->m * sizeof(row_block));
+	memcpy(r->blocks, data->rows[data->i]->blocks, data->f->m * sizeof(row_block));
 
 	pthread_mutex_lock(data->m);
-	data->f->rows[data->f->r] = row;
+	data->f->rows[data->f->r] = r;
 	data->f->r++;
 	pthread_mutex_unlock(data->m);
 
@@ -35,27 +36,43 @@ void *compute_maximize(void *d) {
 
 void *compute_joint_sum(void *d) {
 
-	row *row;
+	row *r;
 	size_t i, j;
 	sum_data *data = d;
 
 	for (i = 0; i < data->f2->r; i++)
-		if (compatible(data->f1, data->a, data->f2, i, data->sh)) {
+		if (compatible(data->f1->rows[data->a], data->f2->rows[i], data->sh)) {
 
-			row = malloc(sizeof(row));
-			row->m = data->f3->m;
-			row->v = data->f1->rows[data->a]->v + data->f2->rows[i]->v;
-			row->blocks = calloc(data->f3->m, data->f3->c / 8);
-			memcpy(row->blocks, data->f1->rows[data->a]->blocks, data->f1->m * (data->f1->c / 8));
+			r = malloc(sizeof(row));
+			r->n = data->f3->n;
+			r->m = data->f3->m;
+			r->v = data->f1->rows[data->a]->v + data->f2->rows[i]->v;
+			r->blocks = calloc(data->f3->m, sizeof(row_block));
+			memcpy(r->blocks, data->f1->rows[data->a]->blocks, data->f1->m * sizeof(row_block));
 
 			for (j = 0; j < data->f2->n; j++)
-				if (BIT(data->f2, i, j)) SETBIT(row->blocks, data->sh[j], data->f1->c);
+				if (GETBIT(data->f2->rows[i], j)) SETBIT(r, data->sh[j]);
 
 			pthread_mutex_lock(data->m);
-			data->f3->rows[data->f3->r] = row;
+			data->f3->rows[data->f3->r] = r;
 			data->f3->r++;
 			pthread_mutex_unlock(data->m);
 		}
+
+	free(data);
+	pthread_exit(NULL);
+}
+
+void *compute_arg_max(void *d) {
+
+	arg_data *data = d;
+
+	if (compatible(data->row, data->prow, data->sh)) {
+		pthread_mutex_lock(data->m);
+		if (!*(data->max_row) || data->row->v > (*(data->max_row))->v)
+			*(data->max_row) = data->row;
+		pthread_mutex_unlock(data->m);
+	}
 
 	free(data);
 	pthread_exit(NULL);
