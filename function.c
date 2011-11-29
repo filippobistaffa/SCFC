@@ -31,8 +31,7 @@ int compare_rows(const void *a, const void *b) {
 	size_t i;
 
 	for (i = 0; i < ra->m; i++)
-		if (ra->blocks[i] != rb->blocks[i])
-			return (int)ra->blocks[i] - (int)rb->blocks[i];
+		if (ra->blocks[i] != rb->blocks[i]) return (int) ra->blocks[i] - (int) rb->blocks[i];
 
 	return 0;
 }
@@ -202,8 +201,9 @@ int main(int argc, char *argv[]) {
 
 	function *msg = maximize(a2->luf, a2->l);
 
-	nuke(msg);
+	value p = max(a2->luf, 0, a2->luf->r);
 
+	nuke(msg);
 	nuke(a0->luf);
 	nuke(a1->luf);
 	nuke(a2->luf);
