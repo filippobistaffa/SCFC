@@ -48,27 +48,6 @@ struct function {
 	row **rows;
 };
 
-struct sum_data {
-
-	function *f1, *f2, *f3;
-	pthread_mutex_t m;
-	size_t a, *sh;
-};
-
-struct shift_data {
-
-	row_block *block;
-	size_t n, l;
-};
-
-struct max_data {
-
-	function *f1, *f2;
-	row_block *blocks;
-	pthread_mutex_t m;
-	size_t i, j;
-};
-
 int compatible(function *f1, size_t a, function *f2, size_t b, size_t *shared);
 int compare_rows(const void *a, const void *b);
 value max(function *f, size_t i, size_t j);

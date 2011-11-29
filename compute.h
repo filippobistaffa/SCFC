@@ -3,6 +3,27 @@
 
 #include "scfc.h"
 
+struct sum_data {
+
+	function *f1, *f2, *f3;
+	pthread_mutex_t *m;
+	size_t a, *sh;
+};
+
+struct shift_data {
+
+	row_block *block;
+	size_t n, l;
+};
+
+struct max_data {
+
+	function *f1, *f2;
+	row_block *blocks;
+	pthread_mutex_t *m;
+	size_t i, j;
+};
+
 void *compute_left_shift(void *d);
 void *compute_joint_sum(void *d);
 void *compute_maximize(void *d);

@@ -64,7 +64,7 @@ function *joint_sum(function *f1, function *f2) {
 		data[j]->f3 = sum;
 		data[j]->sh = sh;
 		data[j]->a = i;
-		data[j]->m = mutex;
+		data[j]->m = &mutex;
 		j++;
 
 		if (i + 1 == f1->r || j == t) {
@@ -181,7 +181,7 @@ function *maximize(function *f, size_t l) {
 
 		max_data[j] = malloc(sizeof(max_data));
 		max_data[j]->blocks = f->rows[i]->blocks;
-		max_data[j]->m = mutex;
+		max_data[j]->m = &mutex;
 		max_data[j]->f2 = max;
 		max_data[j]->f1 = f;
 		max_data[j]->i = h;

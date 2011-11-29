@@ -29,10 +29,10 @@ void *compute_maximize(void *d) {
 	row->blocks = calloc(data->f2->m, data->f2->c / 8);
 	memcpy(row->blocks, data->blocks, data->f1->m * (data->f1->c / 8));
 
-	pthread_mutex_lock(&data->m);
+	pthread_mutex_lock(data->m);
 	data->f2->rows[data->f2->r] = row;
 	data->f2->r++;
-	pthread_mutex_unlock(&data->m);
+	pthread_mutex_unlock(data->m);
 
 	free(data);
 	pthread_exit(NULL);
@@ -56,10 +56,10 @@ void *compute_joint_sum(void *d) {
 			for (j = 0; j < data->f2->n; j++)
 				if (BIT(data->f2, i, j)) SETBIT(row->blocks, data->sh[j], data->f1->c);
 
-			pthread_mutex_lock(&data->m);
+			pthread_mutex_lock(data->m);
 			data->f3->rows[data->f3->r] = row;
 			data->f3->r++;
-			pthread_mutex_unlock(&data->m);
+			pthread_mutex_unlock(data->m);
 		}
 
 	free(data);
