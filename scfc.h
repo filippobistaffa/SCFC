@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#define ECHO 0
+#define ECHO 1
 #define THREADS_PER_CORE 4
 
 /**

@@ -14,6 +14,7 @@ struct agent {
 	function *luf, *pf;
 	variable **vars;
 	size_t *req;
+	value payment;
 };
 
 struct children {
@@ -29,5 +30,7 @@ struct agent_list {
 };
 
 void free_agent_list(agent_list *h);
+void compute_payment(agent *a);
+void create_luf(agent *a);
 
 #endif /* AGENT_H_ */

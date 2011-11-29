@@ -18,8 +18,8 @@ struct shift_data {
 
 struct max_data {
 
-	function *f1, *f2;
-	row_block *blocks;
+	row **rows;
+	function *f;
 	pthread_mutex_t *m;
 	size_t i, j;
 };

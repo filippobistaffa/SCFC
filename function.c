@@ -13,12 +13,12 @@ int compatible(function *f1, size_t a, function *f2, size_t b, size_t *sh) {
 	return 1;
 }
 
-value max(function *f, size_t i, size_t j) {
+value max(row **rows, size_t i, size_t j) {
 
-	value max = f->rows[i]->v;
+	value max = rows[i]->v;
 
 	for (; i < j; i++)
-		if (f->rows[i]->v > max) max = f->rows[i]->v;
+		if (rows[i]->v > max) max = rows[i]->v;
 
 	return max;
 }
@@ -40,43 +40,8 @@ void subtract(function *f, value v) {
 
 	size_t i;
 
-	for (i = 0; i < f->n; i++)
+	for (i = 0; i < f->r; i++)
 		f->rows[i]->v -= v;
-}
-
-void create_luf(agent *a) {
-
-	size_t i;
-	function *luf = malloc(sizeof(function));
-
-	luf->id = a->id;
-	luf->r = luf->n = a->n;
-	luf->c = sizeof(row_block) * 8;
-	luf->m = CEIL((float) luf->n / luf->c);
-	luf->vars = malloc(luf->m * sizeof(agent **));
-	luf->rows = malloc(luf->r * sizeof(row *));
-
-	for (i = 0; i < luf->m; i++)
-		luf->vars[i] = malloc(luf->c * sizeof(agent *));
-
-	for (i = 0; i < a->n; i++)
-		VAR(luf, i) = a->vars[i];
-
-	for (i = 0; i < luf->r; i++) {
-		luf->rows[i] = malloc(sizeof(row));
-		luf->rows[i]->blocks = calloc(luf->m, sizeof(row_block));
-		luf->rows[i]->m = luf->m;
-	}
-
-	for (i = 0; i < luf->n; i++) {
-		SETBIT(luf->rows[i]->blocks, i, luf->c);
-		if (i < a->l)
-			luf->rows[i]->v = a->vars[i]->worth;
-		else
-			SETBIT(luf->rows[i]->blocks, a->req[i - a->l], luf->c);
-	}
-
-	a->luf = luf;
 }
 
 void nuke(function *f) {
@@ -199,15 +164,30 @@ int main(int argc, char *argv[]) {
 	create_luf(a1);
 	create_luf(a2);
 
-	function *msg = maximize(a2->luf, a2->l);
+	function *a1msg, *a2msg;
 
-	value p = max(a2->luf, 0, a2->luf->r);
+	a2->pf = a2->luf;
+	compute_payment(a2);
+	a2msg = maximize(a2->pf, a2->l);
+	subtract(a2msg, a2->payment);
 
-	nuke(msg);
+	a1->pf = joint_sum(a1->luf, a2msg);
+	compute_payment(a1);
+	a1msg = maximize(a1->pf, a1->l);
+	subtract(a1msg, a1->payment);
+
+	a0->pf = joint_sum(a0->luf, a1msg);
+	compute_payment(a0);
+
+	nuke(a0->pf);
+	nuke(a1->pf);
+	nuke(a1msg);
+	nuke(a2msg);
 	nuke(a0->luf);
 	nuke(a1->luf);
 	nuke(a2->luf);
 
+	printf("A0 Payment = %f\nA1 Payment = %f\nA2 Payment = %f\n", a0->payment, a1->payment, a2->payment);
 	printf("Niente segmentation fault, l'avaressito mai dito?\n");
 
 	return 0;

@@ -19,14 +19,14 @@ void *compute_maximize(void *d) {
 	max_data *data = d;
 	row *row = malloc(sizeof(row));
 
-	row->m = data->f1->m;
-	row->v = max(data->f1, data->i, data->j);
-	row->blocks = calloc(data->f2->m, data->f2->c / 8);
-	memcpy(row->blocks, data->blocks, data->f1->m * (data->f1->c / 8));
+	row->m = data->f->m;
+	row->v = max(data->rows, data->i, data->j);
+	row->blocks = malloc(data->f->m * (data->f->c / 8));
+	memcpy(row->blocks, data->rows[data->i]->blocks, data->f->m * (data->f->c / 8));
 
 	pthread_mutex_lock(data->m);
-	data->f2->rows[data->f2->r] = row;
-	data->f2->r++;
+	data->f->rows[data->f->r] = row;
+	data->f->r++;
 	pthread_mutex_unlock(data->m);
 
 	free(data);

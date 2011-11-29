@@ -130,8 +130,6 @@ function *maximize(function *f, size_t l) {
 	pthread_t threads[t];
 	void *status;
 
-	t = 1;
-
 #if ECHO > 0
 	printf("[Maximize] Using blocks of %zu threads\n", t);
 #endif
@@ -194,10 +192,9 @@ function *maximize(function *f, size_t l) {
 		if (!i || (i != f->r && !compare_rows(&(rows[i]), &(rows[i - 1])))) continue;
 
 		m_data[j] = malloc(sizeof(max_data));
-		m_data[j]->blocks = rows[i - 1]->blocks;
+		m_data[j]->rows = rows;
 		m_data[j]->m = &mutex;
-		m_data[j]->f2 = max;
-		m_data[j]->f1 = f;
+		m_data[j]->f = max;
 		m_data[j]->i = h;
 		m_data[j]->j = i;
 		h = i;
