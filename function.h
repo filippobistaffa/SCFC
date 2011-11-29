@@ -12,13 +12,11 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define ECHO 1
-
-#define BITAT(X, I) (X >> I & 1)
-#define VAR(F, I) (F->vars[I / F->c][I % F->c])
-#define SETBIT(A, I, B) (A[I / B] |= 1 << (I % B))
+#define BITAT(X, I) ((X) >> (I) & 1)
+#define VAR(F, I) ((F)->vars[(I) / (F)->c][(I) % (F)->c])
+#define SETBIT(A, I, B) ((A)[(I) / (B)] |= 1 << ((I) % (B)))
 #define CEIL(X) (X - (size_t)(X) > 0 ? (size_t)(X + 1) : (size_t)(X))
-#define BIT(F, R, C) BITAT(((F->rows)[R]->blocks)[C / F->c], C % F->c)
+#define BIT(F, R, C) BITAT((((F)->rows)[R]->blocks)[(C) / (F)->c], (C) % (F)->c)
 
 struct variable {
 

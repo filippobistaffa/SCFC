@@ -31,7 +31,8 @@ int compare_rows(const void *a, const void *b) {
 	size_t i;
 
 	for (i = 0; i < ra->m; i++)
-		if (ra->blocks[i] != rb->blocks[i]) return ra->blocks[i] - rb->blocks[i];
+		if (ra->blocks[i] != rb->blocks[i])
+			return (int)ra->blocks[i] - (int)rb->blocks[i];
 
 	return 0;
 }
@@ -65,6 +66,7 @@ void create_luf(agent *a) {
 	for (i = 0; i < luf->r; i++) {
 		luf->rows[i] = malloc(sizeof(row));
 		luf->rows[i]->blocks = calloc(luf->m, sizeof(row_block));
+		luf->rows[i]->m = luf->m;
 	}
 
 	for (i = 0; i < luf->n; i++) {
@@ -196,12 +198,15 @@ int main(int argc, char *argv[]) {
 
 	create_luf(a0);
 	create_luf(a1);
+	create_luf(a2);
 
-	function *sum = joint_sum(a0->luf, a1->luf);
+	function *msg = maximize(a2->luf, a2->l);
 
-	nuke(sum);
+	nuke(msg);
+
 	nuke(a0->luf);
 	nuke(a1->luf);
+	nuke(a2->luf);
 
 	printf("Niente segmentation fault, l'avaressito mai dito?\n");
 

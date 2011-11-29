@@ -12,7 +12,7 @@ struct sum_data {
 
 struct shift_data {
 
-	row_block *block;
+	row_block *blocks;
 	size_t n, l;
 };
 
@@ -24,8 +24,8 @@ struct max_data {
 	size_t i, j;
 };
 
-void *compute_left_shift(void *d);
-void *compute_joint_sum(void *d);
+void *compute_shift(void *d);
 void *compute_maximize(void *d);
+void *compute_joint_sum(void *d);
 
 #endif /* COMPUTE_H_ */

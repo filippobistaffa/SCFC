@@ -1,19 +1,14 @@
 #include "compute.h"
 
-void *compute_left_shift(void *d) {
+void *compute_shift(void *d) {
 
 	shift_data *data = d;
-	size_t i, s = data->n;
-	unsigned char *byte, bit;
-	void *blocks = data->block;
+	size_t i;
 
-	for (i = 0; i < data->l; i++)
-		for (byte = blocks; s--; ++byte) {
-			bit = 0;
-			if (s) bit = byte[1] & (1 << (CHAR_BIT - 1)) ? 1 : 0;
-			*byte <<= 1;
-			*byte |= bit;
-		}
+	for (i = 0; i < data->n; i++) {
+		data->blocks[i] >>= data->l;
+		if (i) data->blocks[i - 1] |= ((data->blocks[i]) & ((1 << data->l) - 1)) << (sizeof(row_block) * 8 - data->l);
+	}
 
 	free(data);
 	pthread_exit(NULL);

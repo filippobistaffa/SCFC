@@ -111,14 +111,17 @@ function *maximize(function *f, size_t l) {
 
 	size_t i, j, k;
 
-	for (i = l; i < f->n; i++) {
-		if (!max->vars[i / max->c]) max->vars[i / max->c] = malloc(max->c * sizeof(agent *));
-		VAR(max, i - l) = VAR(f, i);
+	for (i = 0; i < max->n; i++) {
+		if (!max->vars[i / max->c])
+			max->vars[i / max->c] = malloc(max->c * sizeof(agent *));
+		VAR(max, i) = VAR(f, i + l);
 	}
 
 	size_t t = sysconf(_SC_NPROCESSORS_CONF) * THREADS_PER_CORE;
 	pthread_t threads[t];
 	void *status;
+
+	t = 1;
 
 #if ECHO > 0
 	printf("[Maximize] Using blocks of %zu threads\n", t);
@@ -129,7 +132,7 @@ function *maximize(function *f, size_t l) {
 	for (i = 0; i < f->r; i++) {
 
 		shift_data[j] = malloc(sizeof(sum_data));
-		shift_data[j]->block = f->rows[i]->blocks;
+		shift_data[j]->blocks = f->rows[i]->blocks;
 		shift_data[j]->n = f->n;
 		shift_data[j]->l = l;
 		j++;
@@ -147,7 +150,7 @@ function *maximize(function *f, size_t l) {
 			printf("[Left Shift] Starting %zu new threads\n", j);
 #endif
 			for (k = 0; k < j; k++)
-				pthread_create(&threads[k], NULL, compute_left_shift, shift_data[k]);
+				pthread_create(&threads[k], NULL, compute_shift, shift_data[k]);
 
 			if (i + 1 != f->r) j = 0;
 		}
@@ -200,7 +203,7 @@ function *maximize(function *f, size_t l) {
 			printf("[Maximize] Starting %zu new threads\n", j);
 #endif
 			for (k = 0; k < j; k++)
-				pthread_create(&threads[k], NULL, compute_left_shift, max_data[k]);
+				pthread_create(&threads[k], NULL, compute_maximize, max_data[k]);
 
 			if (i + 1 != f->r) j = 0;
 		}
