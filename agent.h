@@ -24,6 +24,7 @@ struct children {
 	agent **pch;
 };
 
+char *variable_to_string(variable *v);
 char *assignment_to_string(agent *a);
 void compute_payment(agent *a);
 void create_luf(agent *a);

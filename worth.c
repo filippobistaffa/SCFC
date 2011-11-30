@@ -1,5 +1,29 @@
 #include "worth.h"
 
+void compute_worth(variable *v, value **data, size_t days, size_t n) {
+
+	size_t i, j;
+	value w = 0, cur, min = INFINITY;
+
+	for (j = 0; j < days * SLOTS_PER_DAY; j++) {
+
+		cur = data[v->agents[0]->id][j];
+		for (i = 1; i < v->n; i++)
+			cur += data[v->agents[i]->id][j];
+		if (cur < min) min = cur;
+		w += cur * DAY_AHEAD_MARKET_COST;
+	}
+
+	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days + (v->n - 1) * FORWARD_MARKET_COST / n;
+	v->worth = 1 / w;
+
+#if ALGORITHM_MESSAGES > 0
+	char *str = variable_to_string(v);
+	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, v->worth);
+	free(str);
+#endif
+}
+
 value **read_data(char *filename, size_t users, size_t days) {
 
 	value **data = malloc(users * sizeof(value *));
