@@ -31,6 +31,18 @@ list *find_item(list *h, void *a) {
 	return NULL;
 }
 
+size_t contains_all(list *h, list *k) {
+
+	if (k) {
+		if (find_item(h, k->item))
+			return contains_all(h, k->next);
+		else
+			return 0;
+	}
+
+	return 1;
+}
+
 list *remove_item(list *h, void *a) {
 
 	if (h->item == a) {
@@ -39,6 +51,12 @@ list *remove_item(list *h, void *a) {
 		return n;
 	} else if (h->next) h->next = remove_item(h->next, a);
 
+	return h;
+}
+
+list *remove_all(list *h, list *k) {
+
+	if (k) return remove_all(remove_item(h, k->item), k->next);
 	return h;
 }
 
