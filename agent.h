@@ -30,6 +30,7 @@ struct agent_list {
 	agent_list *next;
 };
 
+char *assignment_to_string(agent *a);
 void free_agent_list(agent_list *h);
 void compute_payment(agent *a);
 void create_luf(agent *a);

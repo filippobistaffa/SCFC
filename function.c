@@ -1,18 +1,6 @@
 #include "function.h"
 #include "threaded.h"
 
-/*int compatible(function *f1, size_t a, function *f2, size_t b, size_t *sh) {
-
- if (!sh) return 1;
-
- size_t i;
-
- for (i = 0; i < f2->n; i++)
- if ((sh[i] < f1->n) && (BIT(f1, a, sh[i]) ^ BIT(f2, b, i))) return 0;
-
- return 1;
- }*/
-
 int compatible(row *r1, row *r2, size_t *sh) {
 
 	if (!sh) return 1;

@@ -320,7 +320,9 @@ void get_arg_max(agent *a) {
 		pthread_join(threads[k], &status);
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;36m[ A-%02zu ] Assignment\033[m\n", a->id);
+	char *str = assignment_to_string(a);
+	printf("\033[1;36m[ A-%02zu ] Active Local Variables = %s\033[m\n", a->id, str);
+	free(str);
 #endif
 
 	pthread_mutex_destroy(&mutex);

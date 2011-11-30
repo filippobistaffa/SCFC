@@ -3,21 +3,30 @@
 
 #include <stdlib.h>
 
+/**
+ * Logging Flags
+ */
+
 #define ALGORITHM_MESSAGES 1
 #define THREAD_MESSAGES 1
 #define MEMORY_MESSAGES 1
 
+/**
+ * Constants
+ */
+
 #define THREADS_PER_CORE 4
+#define MAX_STRING_SIZE 1048576
 
 /**
- * Type implementation
+ * Type Implementation
  */
 
 typedef unsigned row_block;
 typedef float value;
 
 /**
- * Type definition
+ * Type Definition
  */
 
 typedef struct row row;
@@ -33,7 +42,7 @@ typedef struct children children;
 typedef struct agent agent;
 
 /**
- * Header files
+ * Header Files
  */
 
 #include "agent.h"
