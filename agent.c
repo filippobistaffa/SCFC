@@ -5,10 +5,8 @@ char *variable_to_string(variable *v) {
 	// XXX Works only for < 100 agents
 
 	size_t i, j;
-
 	const char post_mask[] = { 0xE2, 0x82, 0x80 };
 	char *str = calloc(v->n * 7 + 3, 1);
-
 	sprintf(str, "X");
 	j = 1;
 
@@ -47,19 +45,7 @@ char *assignment_to_string(agent *a) {
 		}
 
 	strcpy(str + j - 2, "}");
-
 	return realloc(str, strlen(str) + 1);
-}
-
-void free_agent_list(agent_list *h) {
-
-	agent_list *n, *c = h;
-
-	do {
-		n = c->next;
-		free(c);
-		c = n;
-	} while (c != NULL);
 }
 
 void create_luf(agent *a) {

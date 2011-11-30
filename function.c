@@ -4,7 +4,6 @@
 int compatible(row *r1, row *r2, size_t *sh) {
 
 	if (!sh) return 1;
-
 	size_t i;
 
 	for (i = 0; i < r2->n; i++)

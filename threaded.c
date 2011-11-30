@@ -3,14 +3,9 @@
 function *joint_sum(function *f1, function *f2) {
 
 	function *sum = malloc(sizeof(function));
+	size_t r = f1->n * f2->n;
 
 	sum->r = 0;
-
-	/**
-	 * Upper bound allocating, need to reallocate later
-	 */
-
-	size_t r = f1->n * f2->n;
 	sum->n = f1->n + f2->n;
 	sum->m = CEIL((float) sum->n / BLOCK_BITSIZE);
 	sum->vars = calloc(sum->m, sizeof(agent **));
@@ -93,7 +88,6 @@ function *joint_sum(function *f1, function *f2) {
 		pthread_join(threads[k], &status);
 
 	pthread_mutex_destroy(&mutex);
-
 	sum->rows = realloc(sum->rows, sum->r * sizeof(row *));
 
 #if MEMORY_MESSAGES > 0
@@ -179,11 +173,6 @@ function *maximize(agent *a) {
 		pthread_join(threads[k], &status);
 
 	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
-
-	/**
-	 * Upper bound allocating, need to reallocate later
-	 */
-
 	size_t r = a->pf->r;
 	max->rows = malloc(r * sizeof(row *));
 

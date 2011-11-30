@@ -8,8 +8,8 @@
  */
 
 #define ALGORITHM_MESSAGES 1
-#define THREAD_MESSAGES 1
-#define MEMORY_MESSAGES 1
+#define THREAD_MESSAGES 0
+#define MEMORY_MESSAGES 0
 
 /**
  * Constants
@@ -37,9 +37,9 @@ typedef struct max_data max_data;
 typedef struct arg_data arg_data;
 typedef struct shift_data shift_data;
 
-typedef struct agent_list agent_list;
 typedef struct children children;
 typedef struct agent agent;
+typedef struct list list;
 
 /**
  * Header Files
