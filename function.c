@@ -161,13 +161,13 @@ int main(int argc, char *argv[]) {
 	x012->agents[2] = a2;
 
 	value **data = read_data("/home/liquidator/20090112.csv", 3, 1);
-	compute_worth(x0, data, 1, 3);
-	compute_worth(x1, data, 1, 3);
-	compute_worth(x2, data, 1, 3);
-	compute_worth(x01, data, 1, 3);
-	compute_worth(x02, data, 1, 3);
-	compute_worth(x12, data, 1, 3);
-	compute_worth(x012, data, 1, 3);
+	compute_ldf(x0, data, 3, 1);
+	compute_ldf(x1, data, 3, 1);
+	compute_ldf(x2, data, 3, 1);
+	compute_ldf(x01, data, 3, 1);
+	compute_ldf(x02, data, 3, 1);
+	compute_ldf(x12, data, 3, 1);
+	compute_ldf(x012, data, 3, 1);
 
 	x0->worth = 0.1;
 	x1->worth = 0.6;
