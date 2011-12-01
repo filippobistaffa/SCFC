@@ -1,41 +1,41 @@
 #include "list.h"
 
-void free_list(list *h) {
+void free_list(struct list *h) {
 
-	list *n = h->next;
+	struct list *n = h->n;
 	free(h);
 	if (n) free_list(n);
 }
 
-list *copy_list(list *h) {
+struct list *copy_list(struct list *h) {
 
-	list *c = malloc(sizeof(list));
-	if (h->next)
-		c->next = copy_list(h->next);
+	struct list *c = malloc(sizeof(struct list));
+	if (h->n)
+		c->n = copy_list(h->n);
 	else
-		c->next = NULL;
-	c->item = h->item;
+		c->n = NULL;
+	c->i = h->i;
 
 	return c;
 }
 
-list *find_item(list *h, void *a) {
+struct list *find_item(struct list *h, void *a) {
 
 	if (h) {
-		if (h->item == a)
+		if (h->i == a)
 			return h;
 		else
-			return find_item(h->next, a);
+			return find_item(h->n, a);
 	}
 
 	return NULL;
 }
 
-size_t contains_all(list *h, list *k) {
+size_t contains_all(struct list *h, struct list *k) {
 
 	if (k) {
-		if (find_item(h, k->item))
-			return contains_all(h, k->next);
+		if (find_item(h, k->i))
+			return contains_all(h, k->n);
 		else
 			return 0;
 	}
@@ -43,27 +43,27 @@ size_t contains_all(list *h, list *k) {
 	return 1;
 }
 
-list *remove_item(list *h, void *a) {
+struct list *remove_item(struct list *h, void *a) {
 
-	if (h->item == a) {
-		list *n = h->next;
+	if (h->i == a) {
+		struct list *n = h->n;
 		free(h);
 		return n;
-	} else if (h->next) h->next = remove_item(h->next, a);
+	} else if (h->n) h->n = remove_item(h->n, a);
 
 	return h;
 }
 
-list *remove_all(list *h, list *k) {
+struct list *remove_all(struct list *h, struct list *k) {
 
-	if (k) return remove_all(remove_item(h, k->item), k->next);
+	if (k) return remove_all(remove_item(h, k->i), k->n);
 	return h;
 }
 
-void append(list *h, list *a) {
+void append(struct list *h, struct list *a) {
 
-	if (h->next)
-		append(h->next, a);
+	if (h->n)
+		append(h->n, a);
 	else
-		h->next = copy_list(a);
+		h->n = copy_list(a);
 }
