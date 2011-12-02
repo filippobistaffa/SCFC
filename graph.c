@@ -119,15 +119,3 @@ void read_vars(char *filename, agent **agents) {
 	fclose(f);
 }
 
-int test(int argc, char *argv[]) {
-
-	size_t i, n;
-	agent **agents = read_dot("/home/liquidator/scalefreenetwork.dot", &n);
-	read_vars("/home/liquidator/coalitions.txt", agents);
-
-	for (i = 0; i < n; i++)
-		print_list(LIST(agents[i]->vars), variable_to_string);
-
-	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
-	return 0;
-}

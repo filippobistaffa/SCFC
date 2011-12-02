@@ -3,6 +3,10 @@
 
 #include "scfc.h"
 
+#include "threaded.h"
+#include "worth.h"
+#include "list.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <wchar.h>
