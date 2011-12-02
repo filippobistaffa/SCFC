@@ -3,6 +3,6 @@
 
 #include "list.h"
 
-struct list *sort_list(struct list *h, size_t *(*cmp)(struct list *, struct list *));
+struct list *sort_list(struct list *h, int(*cmp)(struct list *, struct list *));
 
 #endif /* LISTSORT_H_ */

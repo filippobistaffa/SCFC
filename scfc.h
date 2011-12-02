@@ -26,15 +26,18 @@
 typedef struct row row;
 typedef struct function function;
 typedef struct variable variable;
+
 typedef struct sum_data sum_data;
 typedef struct max_data max_data;
 typedef struct arg_data arg_data;
+typedef struct dfs_data dfs_data;
 typedef struct shift_data shift_data;
 
 typedef struct agent_list agent_list;
 typedef struct var_list var_list;
-typedef struct children children;
+typedef struct ch_list ch_list;
 typedef struct agent agent;
+typedef struct child child;
 
 /**
  * Type Implementation
@@ -50,6 +53,7 @@ typedef agent item;
 
 #include "list.h"
 #include "agent.h"
+#include "graph.h"
 #include "function.h"
 
 #endif /* SCFC_H_ */

@@ -8,23 +8,23 @@
 
 struct agent {
 
-	size_t id, n, l, d;
-	agent *p, **pp;
-	children **ch;
+	size_t id, n, l, d, r;
+
 	function *luf, *pf;
 	var_list *vars;
 	size_t *req;
 	value payment;
 	row *assignment;
 
-
-	agent_list *nv, *ngh;
+	ch_list *ch;
+	agent *p, *sender;
+	agent_list *nv, *ngh, *pp, *token;
 };
 
-struct children {
+struct child {
 
 	agent *a;
-	agent **pch;
+	agent_list *pch;
 };
 
 char *agent_to_string(void *x);

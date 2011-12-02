@@ -103,11 +103,21 @@ void add(struct list *h, void *i) {
 	}
 }
 
+struct list *retain_all(struct list *h, struct list *r) {
+
+	if (!h) return NULL;
+	if (find_item(r, h->i)) {
+		h->n = retain_all(h->n, r);
+		return h;
+	} else
+		return retain_all(remove_item(h, h->i), r);
+}
+
 void print_list(struct list *h, char *(*f)(void *)) {
 
 	if (h) {
 		char *str = f(h->i);
-		printf("%s\n", str);
+		printf("%s ", str);
 		free(str);
 		print_list(h->n, f);
 	}

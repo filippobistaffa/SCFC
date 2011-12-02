@@ -1,6 +1,6 @@
 #include "scfc.h"
 
-int main(int argc, char *argv[]) {
+int test(int argc, char *argv[]) {
 
 	setlocale(LC_ALL, "");
 
@@ -142,4 +142,39 @@ int main(int argc, char *argv[]) {
 	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
 
 	return 0;
+}
+
+int main(int argc, char *argv[]) {
+
+	size_t i, n;
+	agent **agents = read_dot("/home/liquidator/scalefreenetwork.dot", &n);
+	//read_vars("/home/liquidator/coalitions.txt", agents);
+	agents[2]->r = 1;
+	dfs(agents, n);
+
+	for (i = 0; i < n; i++) {
+
+		if (agents[i]->p)
+			printf("Agent %zu parent = Agent %zu\n", agents[i]->id, agents[i]->p->id);
+		else
+			printf("Agent %zu is root\n", agents[i]->id);
+
+		printf("Agent %zu pseudo-parents = ", agents[i]->id);
+		print_list(LIST(agents[i]->pp), agent_to_string);
+		puts("");
+
+		ch_list *j = agents[i]->ch;
+
+		while (j) {
+
+			printf("Pseudo-children down Agent %zu = ", j->c->a->id);
+			print_list(LIST(j->c->pch), agent_to_string);
+			puts("");
+			j = j->n;
+		}
+	}
+
+	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
+	return 0;
+
 }

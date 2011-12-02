@@ -6,6 +6,13 @@
 #define AGENT_LIST(L) ((agent_list *)(L))
 #define VAR_LIST(L) ((var_list *)(L))
 #define LIST(L) ((struct list *)(L))
+#define CH_LIST(L) ((ch_list *)(L))
+
+struct ch_list {
+
+	child *c;
+	ch_list *n;
+};
 
 struct agent_list {
 
@@ -37,5 +44,6 @@ void print_list(struct list *h, char *(*f)(void *));
 struct list *remove_first(struct list *h, size_t i);
 size_t contains_all(struct list *h, struct list *k);
 struct list *remove_all(struct list *h, struct list *k);
+struct list *retain_all(struct list *h, struct list *r);
 
 #endif /* LIST_H_ */
