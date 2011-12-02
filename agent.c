@@ -1,10 +1,20 @@
 #include "agent.h"
 #include "list.h"
 
-char *variable_to_string(variable *v) {
+char *agent_to_string(void *x) {
 
 	// XXX Works only for < 100 agents
 
+	char *str = calloc(9, 1);
+	sprintf(str, "Agent %02zu", ((agent *)x)->id);
+	return str;
+}
+
+char *variable_to_string(void *x) {
+
+	// XXX Works only for < 100 agents
+
+	variable *v = (variable *) x;
 	size_t i, j;
 	const char post_mask[] = { 0xE2, 0x82, 0x80 };
 	char *str = calloc(v->n * 7 + 3, 1);
@@ -105,4 +115,9 @@ void compute_payment(agent *a) {
 #if ALGORITHM_MESSAGES > 0
 	printf("\033[1;32m[ A-%02zu ] Payment = %f\033[m\n", a->id, a->payment);
 #endif
+}
+
+size_t compare_agents(struct list *a, struct list *b) {
+
+	return AGENT_LIST(b)->a->d - AGENT_LIST(a)->a->d;
 }

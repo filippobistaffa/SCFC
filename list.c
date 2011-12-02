@@ -86,6 +86,12 @@ struct list *get(struct list *h, size_t i) {
 	return get(h->n, i - 1);
 }
 
+struct list *get_last(struct list *h) {
+
+	if (h->n) return get_last(h->n);
+	return h;
+}
+
 void add(struct list *h, void *i) {
 
 	if (h->n)

@@ -53,9 +53,6 @@ void nuke(function *f) {
 
 	size_t i;
 
-	//	for (i = 0; i < f->m; i++)
-	//		free(f->vars[i]);
-
 	free_list(LIST(f->vars));
 
 	for (i = 0; i < f->r; i++) {
@@ -63,7 +60,6 @@ void nuke(function *f) {
 		free(f->rows[i]);
 	}
 
-	free(f->vars);
 	free(f->rows);
 }
 
@@ -71,8 +67,6 @@ size_t size(function *f) {
 
 	return sizeof(function) + f->r * (sizeof(row *) + sizeof(row) + f->m * sizeof(row_block)) + f->m * f->n * sizeof(agent *);
 }
-
-
 
 int main(int argc, char *argv[]) {
 
@@ -114,10 +108,6 @@ int main(int argc, char *argv[]) {
 	variable *x12 = malloc(sizeof(variable));
 	variable *x012 = malloc(sizeof(variable));
 
-//	variable **a0vars = malloc(4 * sizeof(variable *));
-//	variable **a1vars = malloc(4 * sizeof(variable *));
-//	variable **a2vars = malloc(3 * sizeof(variable *));
-
 	x0->n = 1;
 	x1->n = 1;
 	x2->n = 1;
@@ -147,24 +137,21 @@ int main(int argc, char *argv[]) {
 	x012->agents[1] = a1;
 	x012->agents[2] = a2;
 
-	var_list *a0vars = malloc(sizeof(var_list));
-	var_list *a1vars = malloc(sizeof(var_list));
-	var_list *a2vars = malloc(sizeof(var_list));
+	var_list *a0vars = calloc(1, sizeof(var_list));
+	var_list *a1vars = calloc(1, sizeof(var_list));
+	var_list *a2vars = calloc(1, sizeof(var_list));
 
 	a0vars->v = x0;
-	a0vars->n = NULL;
 	add(LIST(a0vars), x01);
 	add(LIST(a0vars), x012);
 	add(LIST(a0vars), x02);
 
 	a1vars->v = x1;
-	a1vars->n = NULL;
 	add(LIST(a1vars), x12);
 	add(LIST(a1vars), x01);
 	add(LIST(a1vars), x012);
 
 	a2vars->v = x2;
-	a2vars->n = NULL;
 	add(LIST(a2vars), x12);
 	add(LIST(a2vars), x02);
 
@@ -173,6 +160,7 @@ int main(int argc, char *argv[]) {
 	a2->vars = a2vars;
 
 	value **data = read_data("/home/liquidator/20090112.csv", 3, 1);
+
 	compute_ldf(x0, data, 3, 1);
 	compute_ldf(x1, data, 3, 1);
 	compute_ldf(x2, data, 3, 1);

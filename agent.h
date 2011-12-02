@@ -8,7 +8,7 @@
 
 struct agent {
 
-	size_t id, n, l;
+	size_t id, n, l, d;
 	agent *p, **pp;
 	children **ch;
 	function *luf, *pf;
@@ -16,6 +16,9 @@ struct agent {
 	size_t *req;
 	value payment;
 	row *assignment;
+
+
+	agent_list *nv, *ngh;
 };
 
 struct children {
@@ -24,7 +27,8 @@ struct children {
 	agent **pch;
 };
 
-char *variable_to_string(variable *v);
+char *agent_to_string(void *x);
+char *variable_to_string(void *v);
 char *assignment_to_string(agent *a);
 void compute_payment(agent *a);
 void create_luf(agent *a);

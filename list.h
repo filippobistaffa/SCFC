@@ -27,6 +27,7 @@ struct list {
 
 void free_list(struct list *h);
 void add(struct list *h, void *i);
+struct list *get_last(struct list *h);
 struct list *copy_list(struct list *h);
 struct list *get(struct list *h, size_t i);
 struct list *find_item(struct list *h, void *a);

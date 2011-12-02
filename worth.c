@@ -81,7 +81,7 @@ value **read_data(char *filename, size_t users, size_t days) {
 		goto end;
 	}
 
-	if (!fread(buf, 1, LINE_LENGTH, f)) {
+	if (!fread(buf, LINE_LENGTH, 1, f)) {
 		fprintf(stderr, "\033[1;31m[ERR0R!] %s Is Empty\033[m\n", filename);
 		free(data);
 		data = NULL;
@@ -102,7 +102,7 @@ value **read_data(char *filename, size_t users, size_t days) {
 				k += VALUE_LENGTH + 1;
 			}
 
-			if (d + 1 != days && (!fread(buf, 1, LINE_LENGTH, f) || strncmp(buf, u, USER_LENGTH))) {
+			if (d + 1 != days && (!fread(buf, LINE_LENGTH, 1, f) || strncmp(buf, u, USER_LENGTH))) {
 				fprintf(stderr, "\033[1;31m[ERR0R!] Not Enough Days In %s\033[m\n", filename);
 				free(data);
 				data = NULL;
@@ -112,7 +112,7 @@ value **read_data(char *filename, size_t users, size_t days) {
 
 		if (i + 1 != users) {
 			while (!strncmp(buf, u, USER_LENGTH))
-				if (!fread(buf, 1, LINE_LENGTH, f)) {
+				if (!fread(buf, LINE_LENGTH, 1, f)) {
 					fprintf(stderr, "\033[1;31m[ERR0R!] Not Enough Users In %s\033[m\n", filename);
 					free(data);
 					data = NULL;
