@@ -14,7 +14,7 @@
 
 #define BITAT(X, I) ((X) >> (I) & 1)
 #define BLOCK_BITSIZE (sizeof(row_block) << 3)
-#define VAR(F, I) ((F)->vars[(I) / BLOCK_BITSIZE][(I) % BLOCK_BITSIZE])
+#define VAR(F, I) ((variable *)(get(LIST((F)->vars), I)->i))
 #define CEIL(X) (X - (size_t)(X) > 0 ? (size_t)(X + 1) : (size_t)(X))
 #define SETBIT(R, I) (((R)->blocks)[(I) / BLOCK_BITSIZE] |= 1 << ((I) % BLOCK_BITSIZE))
 #define GETBIT(R, I) BITAT(((R)->blocks)[(I) / BLOCK_BITSIZE], (I) % BLOCK_BITSIZE)
@@ -42,7 +42,7 @@ struct function {
 	 */
 
 	size_t r, n, m, id;
-	variable ***vars;
+	var_list *vars;
 	row **rows;
 };
 

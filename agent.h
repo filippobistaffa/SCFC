@@ -12,7 +12,7 @@ struct agent {
 	agent *p, **pp;
 	children **ch;
 	function *luf, *pf;
-	variable **vars;
+	var_list *vars;
 	size_t *req;
 	value payment;
 	row *assignment;

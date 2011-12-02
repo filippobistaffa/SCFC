@@ -1,4 +1,5 @@
 #include "threaded.h"
+#include "list.h"
 
 function *joint_sum(function *f1, function *f2) {
 
@@ -14,19 +15,28 @@ function *joint_sum(function *f1, function *f2) {
 	size_t i, j, k, t;
 	size_t s = f1->n, sh[f2->n];
 
-	for (i = 0; i < f1->n; i++) {
-		if (!sum->vars[i / BLOCK_BITSIZE]) sum->vars[i / BLOCK_BITSIZE] = malloc(BLOCK_BITSIZE * sizeof(agent *));
-		VAR(sum, i) = VAR(f1, i);
-	}
+	sum->vars = VAR_LIST(copy_list(LIST(f1->vars)));
+
+	//puts("ciao");
+//	print_var_list(f2->vars);
+	//puts("ciao");
+
+	//	for (i = 0; i < f1->n; i++) {
+	//		if (!sum->vars[i / BLOCK_BITSIZE]) sum->vars[i / BLOCK_BITSIZE] = malloc(BLOCK_BITSIZE * sizeof(agent *));
+	//		VAR(sum, i) = VAR(f1, i);
+	//	}
 
 	for (j = 0; j < f2->n; j++) {
 		for (i = 0; i < f1->n; i++)
-			if (VAR(f1, i) == VAR(f2, j)) {
+			if (VAR(f1, i) ==
+					VAR(f2, j)) {
 				sh[j] = i;
 				goto loop;
 			}
 
-		VAR(sum, s) = VAR(f2, j);
+		add(LIST(sum->vars), VAR(f2, j));
+
+		//	VAR(sum, s) = VAR(f2, j);
 		sh[j] = s++;
 		loop: ;
 	}
@@ -108,15 +118,9 @@ function *maximize(agent *a) {
 	max->r = 0;
 	max->n = a->pf->n - a->l;
 	max->m = CEIL((float) max->n / BLOCK_BITSIZE);
-	max->vars = calloc(max->m, sizeof(agent **));
+	max->vars = VAR_LIST(remove_first(copy_list(LIST(a->pf->vars)), a->l));
 
 	size_t i, j, k;
-
-	for (i = 0; i < max->n; i++) {
-		if (!max->vars[i / BLOCK_BITSIZE]) max->vars[i / BLOCK_BITSIZE] = malloc(BLOCK_BITSIZE * sizeof(agent *));
-		VAR(max, i) = VAR(a->pf, i + a->l);
-	}
-
 	row **rows = malloc(a->pf->r * sizeof(row *));
 
 	for (i = 0; i < a->pf->r; i++) {

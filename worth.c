@@ -15,7 +15,7 @@ void compute_worth(variable *v, value **data, size_t users, size_t days) {
 	}
 
 	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days + (v->n - 1) * FORWARD_MARKET_COST / users;
-	v->worth = 1 / w;
+	v->worth = -w;
 
 #if ALGORITHM_MESSAGES > 0
 	char *str = variable_to_string(v);

@@ -60,10 +60,49 @@ struct list *remove_all(struct list *h, struct list *k) {
 	return h;
 }
 
-void append(struct list *h, struct list *a) {
+struct list *remove_first(struct list *h, size_t i) {
+
+	if (!i) return h;
+	struct list *ret, *temp;
+	temp = get(h, i - 1);
+	ret = temp->n;
+	temp->n = NULL;
+	free_list(h);
+	return ret;
+}
+
+void append_list(struct list *h, struct list *a) {
 
 	if (h->n)
-		append(h->n, a);
+		append_list(h->n, a);
 	else
 		h->n = copy_list(a);
+}
+
+struct list *get(struct list *h, size_t i) {
+
+	if (!h) return NULL;
+	if (!i) return h;
+	return get(h->n, i - 1);
+}
+
+void add(struct list *h, void *i) {
+
+	if (h->n)
+		add(h->n, i);
+	else {
+		h->n = malloc(sizeof(struct list));
+		h->n->n = NULL;
+		h->n->i = i;
+	}
+}
+
+void print_list(struct list *h, char *(*f)(void *)) {
+
+	if (h) {
+		char *str = f(h->i);
+		printf("%s\n", str);
+		free(str);
+		print_list(h->n, f);
+	}
 }

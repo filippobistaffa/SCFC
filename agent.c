@@ -1,4 +1,5 @@
 #include "agent.h"
+#include "list.h"
 
 char *variable_to_string(variable *v) {
 
@@ -62,12 +63,7 @@ void create_luf(agent *a) {
 	luf->m = CEIL((float) luf->n / BLOCK_BITSIZE);
 	luf->vars = malloc(luf->m * sizeof(agent **));
 	luf->rows = malloc(luf->r * sizeof(row *));
-
-	for (i = 0; i < luf->m; i++)
-		luf->vars[i] = malloc(BLOCK_BITSIZE * sizeof(agent *));
-
-	for (i = 0; i < a->n; i++)
-		VAR(luf, i) = a->vars[i];
+	luf->vars = VAR_LIST(copy_list(LIST(a->vars)));
 
 	for (i = 0; i < luf->r; i++) {
 		luf->rows[i] = malloc(sizeof(row));
@@ -79,7 +75,7 @@ void create_luf(agent *a) {
 	for (i = 0; i < luf->n; i++) {
 		SETBIT(luf->rows[i], i);
 		if (i < a->l)
-			luf->rows[i]->v = a->vars[i]->worth;
+			luf->rows[i]->v = VAR(a, i)->worth;
 		else
 			SETBIT(luf->rows[i], a->req[i - a->l]);
 	}
