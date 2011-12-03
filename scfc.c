@@ -146,10 +146,14 @@ int test(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-	size_t i, n;
-	agent **agents = read_dot("/home/liquidator/scalefreenetwork.dot", &n);
-	//read_vars("/home/liquidator/coalitions.txt", agents);
-	agents[2]->r = 1;
+	size_t i, n, r = 0;
+	agent **agents = read_dot("/home/liquidator/data/scalefreenetwork.dot", &n);
+	read_vars("/home/liquidator/data/coalitions.txt", agents);
+
+	for (i = 1; i < n; i++)
+		if (agents[i]->d > agents[r]->d) r = i;
+
+	agents[r]->r = 1;
 	dfs(agents, n);
 
 	for (i = 0; i < n; i++) {
