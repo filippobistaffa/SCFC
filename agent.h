@@ -13,12 +13,13 @@ struct agent {
 	function *luf, *pf;
 	var_list *vars;
 	size_t *req;
-	value payment;
-	row *assignment;
 
-	ch_list *ch;
-	agent *p, *sender;
+	row *assignment;
+	value payment;
+
 	agent_list *nv, *ngh, *pp, *token;
+	agent *p, *sender;
+	ch_list *ch;
 };
 
 struct child {
@@ -33,9 +34,10 @@ struct tuple {
 	agent_list *agents;
 };
 
-char *agent_to_string(void *x);
-char *variable_to_string(void *v);
 char *assignment_to_string(agent *a);
+char *variable_to_string(void *v);
+char *agent_to_string(void *x);
+
 void compute_payment(agent *a);
 void create_luf(agent *a);
 

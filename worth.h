@@ -20,6 +20,7 @@
 #define OFFSET (USER_LENGTH + SEPARATOR + DATE_LENGTH)
 #define LINE_LENGTH (OFFSET + (SEPARATOR + VALUE_LENGTH) * SLOTS_PER_DAY + 1)
 
+void free_data(value **data, size_t users);
 value **read_data(char *filename, size_t users, size_t days);
 void compute_ldf(variable *v, value **data, size_t users, size_t days);
 void compute_worth(variable *v, value **data, size_t users, size_t days);

@@ -26,7 +26,8 @@ void compute_worth(variable *v, value **data, size_t users, size_t days) {
 
 void compute_ldf(variable *v, value **data, size_t users, size_t days) {
 
-	if (v->n == 1) v->worth = 1;
+	if (v->n == 1)
+		v->worth = 1;
 	else {
 		value *num_maxes = calloc(users, sizeof(value));
 		value num_sum = 0;

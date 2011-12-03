@@ -1,13 +1,23 @@
 #include "agent.h"
-#include "list.h"
 
-char *agent_to_string(void *x) {
+char *assignment_to_string(agent *a) {
 
-	// XXX Works only for < 100 agents
+	char *var, *str = malloc(MAX_STRING_SIZE);
+	size_t i, l, j = 0;
+	str[j++] = '{';
 
-	char *str = calloc(9, 1);
-	sprintf(str, "Agent %02zu", ((agent *)x)->id);
-	return str;
+	for (i = 0; i < a->l; i++)
+		if (GETBIT(a->assignment, i)) {
+			var = variable_to_string(VAR(a->pf, i));
+			l = strlen(var);
+			memcpy(str + j, var, l);
+			strcpy(str + j + l, " ,");
+			j += (l + 2);
+			free(var);
+		}
+
+	strcpy(str + j - 2, "}");
+	return realloc(str, strlen(str) + 1);
 }
 
 char *variable_to_string(void *x) {
@@ -39,24 +49,13 @@ char *variable_to_string(void *x) {
 	return str;
 }
 
-char *assignment_to_string(agent *a) {
+char *agent_to_string(void *x) {
 
-	char *var, *str = malloc(MAX_STRING_SIZE);
-	size_t i, l, j = 0;
-	str[j++] = '{';
+	// XXX Works only for < 100 agents
 
-	for (i = 0; i < a->l; i++)
-		if (GETBIT(a->assignment, i)) {
-			var = variable_to_string(VAR(a->pf, i));
-			l = strlen(var);
-			memcpy(str + j, var, l);
-			strcpy(str + j + l, " ,");
-			j += (l + 2);
-			free(var);
-		}
-
-	strcpy(str + j - 2, "}");
-	return realloc(str, strlen(str) + 1);
+	char *str = calloc(9, 1);
+	sprintf(str, "Agent %02zu", ((agent *)x)->id);
+	return str;
 }
 
 void create_luf(agent *a) {

@@ -204,6 +204,10 @@ void *compute_dfs(void *d) {
 	a->token = AGENT_LIST(remove_item(LIST(a->token), a));
 	if (!a->r) send_token(a, a->p, data->cond, data->mutex);
 
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;35m[ A-%02zu ] DFS Successfully Completed\033[m\n", a->id);
+#endif
+
 	free(data);
 	pthread_exit(NULL);
 }

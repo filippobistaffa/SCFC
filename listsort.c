@@ -6,7 +6,6 @@ struct list *sort_list(struct list *h, int(*cmp)(struct list *, struct list *)) 
 	size_t is, ps, qs, n, i;
 
 	if (!h) return NULL;
-
 	is = 1;
 
 	while (1) {

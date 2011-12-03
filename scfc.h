@@ -10,7 +10,6 @@
 #define ALGORITHM_MESSAGES 1
 #define THREAD_MESSAGES 0
 #define MEMORY_MESSAGES 0
-#define GRAPH_MESSAGES 1
 
 /**
  * Constants
@@ -23,15 +22,15 @@
  * Type Definition
  */
 
-typedef struct row row;
 typedef struct function function;
 typedef struct variable variable;
+typedef struct row row;
 
+typedef struct shift_data shift_data;
 typedef struct sum_data sum_data;
 typedef struct max_data max_data;
 typedef struct arg_data arg_data;
 typedef struct dfs_data dfs_data;
-typedef struct shift_data shift_data;
 
 typedef struct agent_list agent_list;
 typedef struct var_list var_list;
@@ -52,9 +51,9 @@ typedef agent item;
  * Header Files
  */
 
-#include "list.h"
+#include "function.h"
 #include "agent.h"
 #include "graph.h"
-#include "function.h"
+#include "list.h"
 
 #endif /* SCFC_H_ */
