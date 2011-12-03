@@ -97,8 +97,7 @@ void add(struct list *h, void *i) {
 	if (h->n)
 		add(h->n, i);
 	else {
-		h->n = malloc(sizeof(struct list));
-		h->n->n = NULL;
+		h->n = calloc(1, sizeof(struct list));
 		h->n->i = i;
 	}
 }
@@ -121,4 +120,30 @@ void print_list(struct list *h, char *(*f)(void *)) {
 		free(str);
 		print_list(h->n, f);
 	}
+	else puts("");
+}
+
+struct list *create_list(void *i) {
+
+	struct list *h = calloc(1, sizeof(struct list));
+	h->i = i;
+	return h;
+}
+
+size_t list_size(struct list *h) {
+
+	if (h) return 1 + list_size(h->n);
+	return 0;
+}
+
+size_t equals(struct list *h, struct list *k) {
+
+	if (h && k)	return (h->i == k->i) && equals(h->n, k->n);
+}
+
+size_t index_of(struct list *h, void *i, size_t(*eq)(void *, void *)) {
+
+	if (eq(h->i, i)) return 0;
+	return 1 + index_of(h->n, i, eq);
+
 }

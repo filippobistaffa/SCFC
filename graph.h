@@ -11,14 +11,22 @@
 #define BLOCK 3
 #define LINE 50
 
-struct dfs_data {
+struct msg_data {
 
 	pthread_mutex_t *mutex;
 	pthread_cond_t *cond;
 	agent *a;
 };
 
+struct tuple {
+
+	variable *var;
+	agent_list *agents;
+};
+
+agent_list *compute_pt(agent *a);
 void dfs(agent **agents, size_t n);
+void vars(agent **agents, size_t n);
 agent **read_dot(char *filename, size_t *n);
 void read_vars(char *filename, agent **agents);
 

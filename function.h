@@ -25,8 +25,7 @@
 
 struct variable {
 
-	size_t n;
-	agent **agents;
+	agent_list *agents;
 	value worth;
 };
 

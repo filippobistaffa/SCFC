@@ -9,7 +9,7 @@
 
 #define ALGORITHM_MESSAGES 1
 #define THREAD_MESSAGES 0
-#define MEMORY_MESSAGES 0
+#define MEMORY_MESSAGES 1
 
 /**
  * Constants
@@ -30,8 +30,9 @@ typedef struct shift_data shift_data;
 typedef struct sum_data sum_data;
 typedef struct max_data max_data;
 typedef struct arg_data arg_data;
-typedef struct dfs_data dfs_data;
+typedef struct msg_data msg_data;
 
+typedef struct tuple_list tuple_list;
 typedef struct agent_list agent_list;
 typedef struct var_list var_list;
 typedef struct ch_list ch_list;

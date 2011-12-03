@@ -3,21 +3,26 @@
 
 #include "scfc.h"
 
-#define ECHO_AGENT 1
-#define COLOR 1
-
 struct agent {
 
-	size_t id, n, l, d, r;
+	size_t id;
+	size_t n;
+	size_t l;
+	size_t d;
+	size_t r;
+	size_t ch_n; // # children
+	size_t ch_id;
 
 	function *luf, *pf;
 	var_list *vars;
 	size_t *req;
 
+	tuple_list **req_msgs;
+
 	row *assignment;
 	value payment;
 
-	agent_list *nv, *ngh, *pp, *token;
+	agent_list *nv, *ngh, *pp, *pt, *token;
 	agent *p, *sender;
 	ch_list *ch;
 };
@@ -26,12 +31,6 @@ struct child {
 
 	agent *a;
 	agent_list *pch;
-};
-
-struct tuple {
-
-	variable *var;
-	agent_list *agents;
 };
 
 char *assignment_to_string(agent *a);

@@ -40,6 +40,8 @@ int test(int argc, char *argv[]) {
 	variable *x12 = malloc(sizeof(variable));
 	variable *x012 = malloc(sizeof(variable));
 
+	/*
+
 	x0->n = 1;
 	x1->n = 1;
 	x2->n = 1;
@@ -56,6 +58,10 @@ int test(int argc, char *argv[]) {
 	x12->agents = malloc(x12->n * sizeof(agent *));
 	x012->agents = malloc(x012->n * sizeof(agent *));
 
+	*/
+
+	/*
+
 	x0->agents[0] = a0;
 	x1->agents[0] = a1;
 	x2->agents[0] = a2;
@@ -68,6 +74,8 @@ int test(int argc, char *argv[]) {
 	x012->agents[0] = a0;
 	x012->agents[1] = a1;
 	x012->agents[2] = a2;
+
+	*/
 
 	var_list *a0vars = calloc(1, sizeof(var_list));
 	var_list *a1vars = calloc(1, sizeof(var_list));
@@ -155,6 +163,8 @@ int main(int argc, char *argv[]) {
 
 	agents[r]->r = 1;
 	dfs(agents, n);
+	agents[r]->pt = compute_pt(agents[r]);
+	vars(agents, n);
 
 	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
 	return 0;

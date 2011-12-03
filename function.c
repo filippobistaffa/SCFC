@@ -62,5 +62,5 @@ void nuke(function *f) {
 
 size_t size(function *f) {
 
-	return sizeof(function) + f->r * (sizeof(row *) + sizeof(row) + f->m * sizeof(row_block)) + f->m * f->n * sizeof(agent *);
+	return sizeof(function) + f->r * (sizeof(row *) + sizeof(row) + f->m * sizeof(row_block)) + list_size(LIST(f->vars)) * sizeof(variable);
 }

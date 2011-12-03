@@ -2,19 +2,25 @@
 
 void compute_worth(variable *v, value **data, size_t users, size_t days) {
 
-	size_t i, t;
+	size_t t;
 	value w = 0, cur, min = INFINITY;
 
 	for (t = 0; t < days * SLOTS_PER_DAY; t++) {
 
-		cur = data[v->agents[0]->id][t];
-		for (i = 1; i < v->n; i++)
-			cur += data[v->agents[i]->id][t];
+		cur = data[v->agents->a->id][t];
+		agent_list *agents = v->agents->n;
+
+		while (agents) {
+
+			cur += data[v->agents->a->id][t];
+			agents = agents->n;
+		}
+
 		if (cur < min) min = cur;
 		w += cur * DAY_AHEAD_MARKET_COST;
 	}
 
-	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days + (v->n - 1) * FORWARD_MARKET_COST / users;
+	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days + (list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users;
 	v->worth = -w;
 
 #if ALGORITHM_MESSAGES > 0
@@ -26,34 +32,39 @@ void compute_worth(variable *v, value **data, size_t users, size_t days) {
 
 void compute_ldf(variable *v, value **data, size_t users, size_t days) {
 
-	if (v->n == 1)
+	if (list_size(LIST(v->agents)) == 1)
 		v->worth = 1;
 	else {
 		value *num_maxes = calloc(users, sizeof(value));
 		value num_sum = 0;
 		value den_sum;
 		value den_max = 0;
-		size_t i, t;
+		size_t id, t;
 
 		for (t = 0; t < days * SLOTS_PER_DAY; t++) {
 
 			den_sum = 0;
 
-			for (i = 0; i < v->n; i++) {
+			agent_list *agents = v->agents;
 
-				if (data[v->agents[i]->id][t] > num_maxes[v->agents[i]->id]) {
-					num_sum += data[v->agents[i]->id][t] - num_maxes[v->agents[i]->id];
-					num_maxes[v->agents[i]->id] = data[v->agents[i]->id][t];
+			while (agents) {
+
+				id = v->agents->a->id;
+
+				if (data[id][t] > num_maxes[id]) {
+					num_sum += data[id][t] - num_maxes[id];
+					num_maxes[id] = data[id][t];
 				}
 
-				den_sum += data[v->agents[i]->id][t];
+				den_sum += data[id][t];
+				agents = agents->n;
 			}
 
 			den_max = den_sum > den_max ? den_sum : den_max;
 		}
 
 		free(num_maxes);
-		v->worth = num_sum / den_max + v->n - 1;
+		v->worth = num_sum / den_max + list_size(LIST(v->agents)) - 1;
 	}
 
 #if ALGORITHM_MESSAGES > 0

@@ -25,25 +25,28 @@ char *variable_to_string(void *x) {
 	// XXX Works only for < 100 agents
 
 	variable *v = (variable *) x;
-	size_t i, j;
 	const char post_mask[] = { 0xE2, 0x82, 0x80 };
-	char *str = calloc(v->n * 7 + 3, 1);
+	char *str = calloc(list_size(LIST(v->agents)) * 7 + 3, 1);
 	sprintf(str, "X");
-	j = 1;
+	size_t j = 1;
 
-	for (i = 0; i < v->n; i++) {
+	agent_list *agents = v->agents;
+
+	while (agents) {
 
 		str[j++] = '.';
 
-		if (v->agents[i]->id > 9) {
+		if (agents->a->id > 9) {
 			memcpy(str + j, post_mask, 3);
-			*(str + j + 2) |= v->agents[i]->id / 10;
+			*(str + j + 2) |= agents->a->id / 10;
 			j += 3;
 		}
 
 		memcpy(str + j, post_mask, 3);
-		*(str + j + 2) |= v->agents[i]->id % 10;
+		*(str + j + 2) |= agents->a->id % 10;
 		j += 3;
+
+		agents = agents->n;
 	}
 
 	return str;
@@ -54,7 +57,7 @@ char *agent_to_string(void *x) {
 	// XXX Works only for < 100 agents
 
 	char *str = calloc(9, 1);
-	sprintf(str, "Agent %02zu", ((agent *)x)->id);
+	sprintf(str, "Agent %02zu", ((agent *) x)->id);
 	return str;
 }
 
@@ -89,8 +92,10 @@ void create_luf(agent *a) {
 			SETBIT(luf->rows[i], a->req[i - a->l]);
 	}
 
+	if (a->req) free(a->req);
+
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] LUF Function Dimension = %zu Bytes\n", size(luf));
+	printf("[MEMORY] A-%02zu LUF Function = %zu Bytes\n", a->id, size(luf));
 #endif
 
 	a->luf = luf;
