@@ -27,6 +27,12 @@ struct child {
 	agent_list *pch;
 };
 
+struct tuple {
+
+	variable *var;
+	agent_list *agents;
+};
+
 char *agent_to_string(void *x);
 char *variable_to_string(void *v);
 char *assignment_to_string(agent *a);

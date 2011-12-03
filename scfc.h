@@ -38,6 +38,7 @@ typedef struct var_list var_list;
 typedef struct ch_list ch_list;
 typedef struct agent agent;
 typedef struct child child;
+typedef struct tuple tuple;
 
 /**
  * Type Implementation
