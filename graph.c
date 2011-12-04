@@ -113,6 +113,21 @@ void read_vars(char *filename, agent **agents) {
 	fclose(f);
 }
 
+agent_list *compute_pt(agent *a) {
+
+	agent_list *pt = AGENT_LIST(create_list(a));
+	ch_list *children = a->ch;
+
+	while (children) {
+
+		children->c->a->pt = compute_pt(children->c->a);
+		append_list(LIST(pt), LIST(children->c->a->pt));
+		children = children->n;
+	}
+
+	return pt;
+}
+
 void wait_token(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 	pthread_mutex_lock(mutex);
@@ -203,29 +218,6 @@ void *compute_dfs(void *d) {
 	pthread_exit(NULL);
 }
 
-void dfs(agent **agents, size_t n) {
-
-	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-	pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-
-	pthread_t threads[n];
-	msg_data *data[n];
-	void *status;
-	size_t i;
-
-	for (i = 0; i < n; i++) {
-
-		data[i] = malloc(sizeof(msg_data));
-		data[i]->a = agents[i];
-		data[i]->cond = &cond;
-		data[i]->mutex = &mutex;
-		pthread_create(&threads[i], NULL, compute_dfs, data[i]);
-	}
-
-	for (i = 0; i < n; i++)
-		pthread_join(threads[i], &status);
-}
-
 void wait_req_msg(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 	pthread_mutex_lock(mutex);
@@ -240,13 +232,6 @@ void send_req_msg(agent *a, size_t id, tuple_list *msg, pthread_cond_t *cond, pt
 	a->req_msgs[id] = msg;
 	pthread_cond_broadcast(cond);
 	pthread_mutex_unlock(mutex);
-}
-
-size_t var_agent_list(void *a, void *b) {
-
-	variable *v = (variable *) a;
-	agent_list *l = (agent_list *) b;
-	return equals(LIST(v->agents), LIST(l));
 }
 
 void *compute_vars(void *d) {
@@ -378,46 +363,11 @@ void *compute_vars(void *d) {
 		tuples = tuples->n;
 	}
 	free_list(LIST(req_msg));
-	free(data);
 
+	a->dem_msgs = calloc(a->ch_n, sizeof(function *));
 	create_luf(a);
+
+	free(data);
 	pthread_exit(NULL);
 }
 
-void vars(agent **agents, size_t n) {
-
-	pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-	pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-
-	pthread_t threads[n];
-	msg_data *data[n];
-	void *status;
-	size_t i;
-
-	for (i = 0; i < n; i++) {
-
-		data[i] = malloc(sizeof(msg_data));
-		data[i]->a = agents[i];
-		data[i]->cond = &cond;
-		data[i]->mutex = &mutex;
-		pthread_create(&threads[i], NULL, compute_vars, data[i]);
-	}
-
-	for (i = 0; i < n; i++)
-		pthread_join(threads[i], &status);
-}
-
-agent_list *compute_pt(agent *a) {
-
-	agent_list *pt = AGENT_LIST(create_list(a));
-	ch_list *children = a->ch;
-
-	while (children) {
-
-		children->c->a->pt = compute_pt(children->c->a);
-		append_list(LIST(pt), LIST(children->c->a->pt));
-		children = children->n;
-	}
-
-	return pt;
-}

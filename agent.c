@@ -120,3 +120,4 @@ void compute_payment(agent *a) {
 	printf("\033[1;32m[ A-%02zu ] Payment = %f\033[m\n", a->id, a->payment);
 #endif
 }
+

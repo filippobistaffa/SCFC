@@ -7,7 +7,7 @@
  * Logging Flags
  */
 
-#define ALGORITHM_MESSAGES 1
+#define ALGORITHM_MESSAGES 0
 #define THREAD_MESSAGES 0
 #define MEMORY_MESSAGES 1
 

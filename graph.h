@@ -24,10 +24,11 @@ struct tuple {
 	agent_list *agents;
 };
 
-agent_list *compute_pt(agent *a);
-void dfs(agent **agents, size_t n);
-void vars(agent **agents, size_t n);
-agent **read_dot(char *filename, size_t *n);
 void read_vars(char *filename, agent **agents);
+agent **read_dot(char *filename, size_t *n);
+agent_list *compute_pt(agent *a);
+
+void *compute_dfs(void *d);
+void *compute_vars(void *d);
 
 #endif /* GRAPH_H_ */

@@ -17,6 +17,7 @@ struct agent {
 	var_list *vars;
 	size_t *req;
 
+	function **dem_msgs;
 	tuple_list **req_msgs;
 
 	row *assignment;
