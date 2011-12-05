@@ -1,45 +1,48 @@
 #include "threaded.h"
-#include "list.h"
+
+size_t *shared(function *f1, function *f2, size_t *n, var_list *s) {
+
+	size_t i, j, *sh = calloc(1, f2->n * sizeof(size_t));
+	var_list *h, *k = f2->vars;
+	*n = f1->n;
+	j = 0;
+
+	while (k) {
+		h = f1->vars;
+		i = 0;
+		while (h) {
+			if (h->v == k->v) {
+				sh[j] = i;
+				goto loop;
+			}
+			h = h->n;
+			i++;
+		}
+
+		if (s) add(LIST(s), k->v);
+		sh[j] = (*n)++;
+		loop: k = k->n;
+		j++;
+	}
+
+	return sh;
+}
 
 function *joint_sum(function *f1, function *f2) {
 
 	function *sum = malloc(sizeof(function));
-	size_t r = f1->n * f2->n;
-
-	sum->r = 0;
-	sum->n = f1->n + f2->n;
-	sum->m = CEIL((float) sum->n / BLOCK_BITSIZE);
-	sum->vars = calloc(sum->m, sizeof(agent **));
-	sum->rows = malloc(r * sizeof(row *));
-
-	size_t i, j, k, t, w;
-	size_t s = f1->n, sh[f2->n];
-
+	sum->rows = malloc(f1->n * f2->n * sizeof(row *));
 	sum->vars = VAR_LIST(copy_list(LIST(f1->vars)));
-
-	for (j = 0; j < f2->n; j++) {
-		for (i = 0; i < f1->n; i++)
-			if (VAR(f1, i) ==
-					VAR(f2, j)) {
-				sh[j] = i;
-				goto loop;
-			}
-
-		add(LIST(sum->vars), VAR(f2, j));
-		sh[j] = s++;
-		loop: ;
-	}
-
-	sum->n = s;
+	sum->r = 0;
+	size_t *sh = shared(f1, f2, &(sum->n), sum->vars);
 	sum->m = CEIL((float) sum->n / BLOCK_BITSIZE);
-	sum->vars = realloc(sum->vars, sum->m * sizeof(agent **));
+	size_t i, j, k, t, w;
 
 	t = THREAD_NUMBER;
 	j = 0, w = 0;
 	t = 1;
 
 	pthread_t threads[t];
-
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 
@@ -95,6 +98,7 @@ function *joint_sum(function *f1, function *f2) {
 	printf("[MEMORY] Sum Function Dimension = %zu bytes\n", size(sum));
 #endif
 
+	free(sh);
 	return sum;
 }
 
@@ -238,20 +242,8 @@ function *maximize(agent *a) {
 
 void get_arg_max(agent *a) {
 
-	size_t i, j, k, t, w;
-	size_t s = a->pf->n;
-	size_t sh[a->p->pf->n];
-
-	for (j = 0; j < a->p->pf->n; j++) {
-		for (i = 0; i < a->pf->n; i++)
-			if (VAR(a->pf, i) == VAR(a->p->pf, j)) {
-				sh[j] = i;
-				goto loop;
-			}
-
-		sh[j] = s++;
-		loop: ;
-	}
+	size_t i, j, k, s, t, w;
+	size_t *sh = shared(a->pf, a->p->pf, &s, NULL);
 
 	t = THREAD_NUMBER;
 	j = 0, w = 0;

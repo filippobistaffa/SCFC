@@ -2,6 +2,7 @@
 #define THREADED_H_
 
 #include "scfc.h"
+#include "list.h"
 #include "compute.h"
 
 #define THREAD_NUMBER sysconf(_SC_NPROCESSORS_CONF) * THREADS_PER_CORE
