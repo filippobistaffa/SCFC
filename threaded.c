@@ -35,63 +35,41 @@ function *joint_sum(function *f1, function *f2) {
 	sum->r = 0;
 	size_t *sh = shared(f1, f2, &(sum->n), sum->vars);
 	sum->m = CEIL((float) sum->n / BLOCK_BITSIZE);
-	size_t i, j, k, t, w;
+	size_t i, k, t;
 
-	t = f1->r < THREAD_NUMBER ? f1->r : THREAD_NUMBER;
-printf("%zu\n", t);
-
-	t = THREAD_NUMBER;
-	j = 0, w = 0;
-	t = 1;
-
-	pthread_t threads[t];
-	pthread_mutex_t mutex;
-	pthread_mutex_init(&mutex, NULL);
+	if (f1->r > THREAD_NUMBER) {
+		t = THREAD_NUMBER;
+		k = f1->r / t;
+	} else {
+		t = f1->r;
+		k = 1;
+	}
 
 #if THREAD_MESSAGES > 0
 	printf("[ JSUM ] Using Blocks Of %zu Threads\n", t);
 #endif
 
+	pthread_t threads[t];
+	pthread_mutex_t mutex;
+	pthread_mutex_init(&mutex, NULL);
 	sum_data *data[t];
 
-	for (i = 0; i < f1->r; i++) {
+	for (i = 0; i < t; i++) {
 
-		data[j] = malloc(sizeof(sum_data));
-		data[j]->f1 = f1;
-		data[j]->f2 = f2;
-		data[j]->f3 = sum;
-		data[j]->sh = sh;
-		data[j]->a = i;
-		data[j]->m = &mutex;
-		j++;
+		data[i] = malloc(sizeof(sum_data));
+		data[i]->f1 = f1;
+		data[i]->f2 = f2;
+		data[i]->f3 = sum;
+		data[i]->sh = sh;
+		data[i]->a = i * k;
+		data[i]->b = (i == t - 1) ? (f1->r - 1) : ((i + 1) * k - 1);
+		data[i]->m = &mutex;
 
-		if (i + 1 == f1->r || j == t) {
-
-			if (w) {
-#if THREAD_MESSAGES > 0
-				printf("[ JSUM ] Waiting %zu Threads\n", t);
-#endif
-				for (k = 0; k < t; k++)
-					pthread_join(threads[k], NULL);
-			}
-
-#if THREAD_MESSAGES > 0
-			printf("[ JSUM ] Starting %zu Threads\n", j);
-#endif
-			for (k = 0; k < j; k++)
-				pthread_create(&threads[k], NULL, compute_joint_sum, data[k]);
-
-			w = 1;
-			if (i + 1 != f1->r) j = 0;
-		}
+		pthread_create(&threads[i], NULL, compute_joint_sum, data[i]);
 	}
 
-#if THREAD_MESSAGES > 0
-	printf("[ JSUM ] Waiting %zu Final Threads\n", j);
-#endif
-
-	for (k = 0; k < j; k++)
-		pthread_join(threads[k], NULL);
+	for (i = 0; i < t; i++)
+		pthread_join(threads[i], NULL);
 
 	pthread_mutex_destroy(&mutex);
 	sum->rows = realloc(sum->rows, sum->r * sizeof(row *));

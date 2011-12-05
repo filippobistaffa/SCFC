@@ -32,8 +32,6 @@ int main(int argc, char *argv[]) {
 	for (i = 1; i < n; i++)
 		if (agents[i]->d > agents[r]->d) r = i;
 
-	printf("root = %zu\n", r);
-
 	agents[r]->r = 1;
 	run_agents(agents, n, compute_dfs);
 
