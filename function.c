@@ -49,7 +49,7 @@ void nuke(function *f) {
 #endif
 
 	size_t i;
-	free_list(LIST(f->vars));
+	//free_list(LIST(f->vars));
 
 	for (i = 0; i < f->r; i++) {
 		free(f->rows[i]->blocks);

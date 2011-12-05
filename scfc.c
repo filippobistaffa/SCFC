@@ -40,11 +40,6 @@ int main(int argc, char *argv[]) {
 	agents[r]->pt = compute_pt(agents[r]);
 	run_agents(agents, n, compute_vars);
 
-/*	for (i = 0; i < n; i++) {
-		printf("Agent %zu (%zu local vars)\n", agents[i]->id, agents[i]->l);
-		print_list(LIST(agents[i]->vars), variable_to_string);
-	}*/
-
 	value **data = read_data("/home/liquidator/20090112.csv", n, 1);
 
 	for (i = 0; i < n; i++)
