@@ -18,7 +18,6 @@ size_t *shared(function *f1, function *f2, size_t *n, var_list *s) {
 			h = h->n;
 			i++;
 		}
-
 		if (s) add(LIST(s), k->v);
 		sh[j] = (*n)++;
 		loop: k = k->n;
@@ -37,6 +36,9 @@ function *joint_sum(function *f1, function *f2) {
 	size_t *sh = shared(f1, f2, &(sum->n), sum->vars);
 	sum->m = CEIL((float) sum->n / BLOCK_BITSIZE);
 	size_t i, j, k, t, w;
+
+	t = f1->r < THREAD_NUMBER ? f1->r : THREAD_NUMBER;
+printf("%zu\n", t);
 
 	t = THREAD_NUMBER;
 	j = 0, w = 0;

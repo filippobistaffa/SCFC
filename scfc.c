@@ -46,7 +46,6 @@ int main(int argc, char *argv[]) {
 		compute_luf(agents[i], data, n, 1, compute_ldf);
 
 	free_data(data, n);
-
 	run_agents(agents, n, compute_scf);
 
 	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");

@@ -7,7 +7,7 @@ struct sum_data {
 
 	function *f1, *f2, *f3;
 	pthread_mutex_t *m;
-	size_t a, *sh;
+	size_t a, b, *sh;
 };
 
 struct shift_data {
