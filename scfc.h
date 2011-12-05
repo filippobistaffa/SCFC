@@ -7,15 +7,16 @@
  * Logging Flags
  */
 
-#define ALGORITHM_MESSAGES 0
+#define ALGORITHM_MESSAGES 1
 #define THREAD_MESSAGES 0
-#define MEMORY_MESSAGES 1
+#define MEMORY_MESSAGES 0
+#define WORTH_MESSAGES 0
 
 /**
  * Constants
  */
 
-#define THREADS_PER_CORE 4
+#define THREADS_PER_CORE 1024
 #define MAX_STRING_SIZE 1048576
 
 /**

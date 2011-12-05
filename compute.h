@@ -13,7 +13,7 @@ struct sum_data {
 struct shift_data {
 
 	row_block *blocks;
-	size_t n, l;
+	size_t m, l;
 };
 
 struct max_data {

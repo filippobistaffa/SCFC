@@ -68,7 +68,7 @@ agent **read_dot(char *filename, size_t *n) {
 
 void read_vars(char *filename, agent **agents) {
 
-	FILE *f = fopen(filename, "r");
+	FILE *f = fopen(filename, "rb");
 
 	if (!f) {
 		fprintf(stderr, "\033[1;31m[ERR0R!] %s Not Found\033[m\n", filename);
@@ -99,6 +99,7 @@ void read_vars(char *filename, agent **agents) {
 				else
 					agents[a]->vars = VAR_LIST(create_list(v));
 
+				agents[a]->l++;
 				v = calloc(1, sizeof(variable));
 
 				if (buf[(i + 1) * BLOCK - 1] == '\r') a++;
@@ -160,7 +161,7 @@ void *compute_dfs(void *d) {
 
 		wait_token(a, data->cond, data->mutex);
 		a->p = a->sender;
-		a->l = a->p->l + 1;
+		a->level = a->p->level + 1;
 		a->ch_id = a->p->ch_n - 1;
 		a->pp = AGENT_LIST(retain_all(copy_list(LIST(a->token)), LIST(a->ngh)));
 		free_list(LIST(a->ngh));
@@ -182,7 +183,8 @@ void *compute_dfs(void *d) {
 			i->a->nv = AGENT_LIST(remove_item(LIST(i->a->nv), a));
 			i = i->n;
 		}
-	}
+	} else
+		a->level = 0;
 
 	a->nv = AGENT_LIST(sort_list(LIST(a->nv), compare_degree));
 
@@ -220,10 +222,18 @@ void *compute_dfs(void *d) {
 
 void wait_req_msg(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;31m[ A-%02zu ] Waiting Require Message\033[m\n", a->id);
+#endif
+
 	pthread_mutex_lock(mutex);
 	while (!a->p->req_msgs || !a->p->req_msgs[a->ch_id])
 		pthread_cond_wait(cond, mutex);
 	pthread_mutex_unlock(mutex);
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;35m[ A-%02zu ] Require Message Received\033[m\n", a->id);
+#endif
 }
 
 void send_req_msg(agent *a, size_t id, tuple_list *msg, pthread_cond_t *cond, pthread_mutex_t *mutex) {
@@ -248,15 +258,8 @@ void *compute_vars(void *d) {
 
 	if (a->p) {
 
-#if ALGORITHM_MESSAGES > 0
-		printf("\033[1;31m[ A-%02zu ] Waiting Require Message\033[m\n", a->id);
-#endif
 		wait_req_msg(a, data->cond, data->mutex);
-
-#if ALGORITHM_MESSAGES > 0
-		printf("\033[1;35m[ A-%02zu ] Require Message Received\033[m\n", a->id);
-#endif
-		a->req = malloc(1000 * MAX_AGENTS * sizeof(size_t));
+		a->req = malloc(100000 * MAX_AGENTS * sizeof(size_t));
 		tuples = a->p->req_msgs[a->ch_id];
 
 		while (tuples) {
@@ -307,6 +310,7 @@ void *compute_vars(void *d) {
 	tuple *t;
 	tuple_list *msg, *req_msg = NULL;
 	var_list *vars = a->vars;
+	a->n = a->l + i;
 
 	while (vars) {
 
@@ -365,7 +369,106 @@ void *compute_vars(void *d) {
 	free_list(LIST(req_msg));
 
 	a->dem_msgs = calloc(a->ch_n, sizeof(function *));
-	create_luf(a);
+
+	free(data);
+	pthread_exit(NULL);
+}
+
+void wait_dem_msgs(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;31m[ A-%02zu ] Waiting Demand Messages\033[m\n", a->id);
+#endif
+
+	size_t i, all;
+	pthread_mutex_lock(mutex);
+
+	while (1) {
+
+		all = 1;
+
+		for (i = 0; i < a->ch_n; i++)
+			if (!a->dem_msgs[i]) {
+				all = 0;
+				break;
+			}
+
+		if (!all)
+			pthread_cond_wait(cond, mutex);
+		else
+			break;
+	}
+
+	pthread_mutex_unlock(mutex);
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;35m[ A-%02zu ] All Demand Messages Received\033[m\n", a->id);
+#endif
+}
+
+void send_dem_msg(agent *a, size_t id, function *msg, pthread_cond_t *cond, pthread_mutex_t *mutex) {
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;33m[ A-%02zu ] Sending Demand Message To A-%02zu\033[m\n", a->id, a->p->id);
+#endif
+
+	pthread_mutex_lock(mutex);
+	a->p->dem_msgs[id] = msg;
+	pthread_cond_broadcast(cond);
+	pthread_mutex_unlock(mutex);
+}
+
+void wait_parent_ass(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
+
+	pthread_mutex_lock(mutex);
+	while (!a->p->assignment)
+		pthread_cond_wait(cond, mutex);
+	pthread_mutex_unlock(mutex);
+
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;35m[ A-%02zu ] Assignment Received From Parent\033[m\n", a->id);
+#endif
+}
+
+void *compute_scf(void *d) {
+
+	msg_data *data = (msg_data *) d;
+	agent *a = data->a;
+	a->pf = a->luf;
+	size_t i;
+
+	if (a->ch_n) {
+
+		wait_dem_msgs(a, data->cond, data->mutex);
+
+#if ALGORITHM_MESSAGES > 0
+		printf("\033[1;37m[ A-%02zu ] Computing Payment Function\033[m\n", a->id);
+#endif
+		function *pf;
+
+		for (i = 0; i < a->ch_n; i++) {
+			pf = joint_sum(a->pf, a->dem_msgs[i]);
+			nuke(a->pf);
+			nuke(a->dem_msgs[i]);
+			a->pf = pf;
+		}
+	}
+
+	compute_payment(a, data->cond, data->mutex);
+
+	if (a->p) {
+
+		function *msg = maximize(a);
+		subtract(msg, a->payment);
+		send_dem_msg(a, a->ch_id, msg, data->cond, data->mutex);
+		wait_parent_ass(a, data->cond, data->mutex);
+		pthread_mutex_lock(data->mutex);
+		get_arg_max(a);
+		pthread_cond_broadcast(data->cond);
+		pthread_mutex_unlock(data->mutex);
+	}
+
+	//if (a->ch_n) nuke(a->pf);
 
 	free(data);
 	pthread_exit(NULL);

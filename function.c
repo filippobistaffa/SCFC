@@ -49,13 +49,6 @@ void nuke(function *f) {
 #endif
 
 	size_t i;
-
-	var_list *vars = f->vars;
-	while (vars) {
-		free_list(LIST(vars->v->agents));
-		free(vars->v);
-		vars = vars->n;
-	}
 	free_list(LIST(f->vars));
 
 	for (i = 0; i < f->r; i++) {

@@ -61,7 +61,7 @@ char *agent_to_string(void *x) {
 	return str;
 }
 
-void create_luf(agent *a) {
+void compute_luf(agent *a, value **data, size_t users, size_t days, value (*worth)(variable *, value **, size_t, size_t)) {
 
 #if ALGORITHM_MESSAGES > 0
 	printf("\033[1;37m[ A-%02zu ] Creating LUF Function\033[m\n", a->id);
@@ -73,7 +73,6 @@ void create_luf(agent *a) {
 	luf->id = a->id;
 	luf->r = luf->n = a->n;
 	luf->m = CEIL((float) luf->n / BLOCK_BITSIZE);
-	luf->vars = malloc(luf->m * sizeof(agent **));
 	luf->rows = malloc(luf->r * sizeof(row *));
 	luf->vars = VAR_LIST(copy_list(LIST(a->vars)));
 
@@ -84,12 +83,16 @@ void create_luf(agent *a) {
 		luf->rows[i]->n = luf->n;
 	}
 
+	var_list *vars = luf->vars;
+
 	for (i = 0; i < luf->n; i++) {
 		SETBIT(luf->rows[i], i);
 		if (i < a->l)
-			luf->rows[i]->v = VAR(a, i)->worth;
+			luf->rows[i]->v = worth(vars->v, data, users, days);
 		else
 			SETBIT(luf->rows[i], a->req[i - a->l]);
+
+		vars = vars->n;
 	}
 
 	if (a->req) free(a->req);
@@ -101,12 +104,15 @@ void create_luf(agent *a) {
 	a->luf = luf;
 }
 
-void compute_payment(agent *a) {
+void compute_payment(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 	if (a->p)
 		a->payment = max(a->pf->rows, 0, a->pf->r)->v;
 	else {
+		pthread_mutex_lock(mutex);
 		a->assignment = max(a->pf->rows, 0, a->pf->r);
+		pthread_cond_broadcast(cond);
+		pthread_mutex_unlock(mutex);
 		a->payment = a->assignment->v;
 
 #if ALGORITHM_MESSAGES > 0
@@ -120,4 +126,3 @@ void compute_payment(agent *a) {
 	printf("\033[1;32m[ A-%02zu ] Payment = %f\033[m\n", a->id, a->payment);
 #endif
 }
-

@@ -1,6 +1,6 @@
 #include "worth.h"
 
-void compute_worth(variable *v, value **data, size_t users, size_t days) {
+value compute_worth(variable *v, value **data, size_t users, size_t days) {
 
 	size_t t;
 	value w = 0, cur, min = INFINITY;
@@ -12,7 +12,7 @@ void compute_worth(variable *v, value **data, size_t users, size_t days) {
 
 		while (agents) {
 
-			cur += data[v->agents->a->id][t];
+			cur += data[agents->a->id][t];
 			agents = agents->n;
 		}
 
@@ -21,19 +21,23 @@ void compute_worth(variable *v, value **data, size_t users, size_t days) {
 	}
 
 	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days + (list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users;
-	v->worth = -w;
+	w = -w;
 
-#if ALGORITHM_MESSAGES > 0
+#if WORTH_MESSAGES > 0
 	char *str = variable_to_string(v);
-	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, v->worth);
+	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, w);
 	free(str);
 #endif
+
+	return w;
 }
 
-void compute_ldf(variable *v, value **data, size_t users, size_t days) {
+value compute_ldf(variable *v, value **data, size_t users, size_t days) {
+
+	value w;
 
 	if (list_size(LIST(v->agents)) == 1)
-		v->worth = 1;
+		w = 1;
 	else {
 		value *num_maxes = calloc(users, sizeof(value));
 		value num_sum = 0;
@@ -49,7 +53,7 @@ void compute_ldf(variable *v, value **data, size_t users, size_t days) {
 
 			while (agents) {
 
-				id = v->agents->a->id;
+				id = agents->a->id;
 
 				if (data[id][t] > num_maxes[id]) {
 					num_sum += data[id][t] - num_maxes[id];
@@ -64,14 +68,16 @@ void compute_ldf(variable *v, value **data, size_t users, size_t days) {
 		}
 
 		free(num_maxes);
-		v->worth = num_sum / den_max + list_size(LIST(v->agents)) - 1;
+		w = num_sum / den_max + list_size(LIST(v->agents)) - 1;
 	}
 
-#if ALGORITHM_MESSAGES > 0
+#if WORTH_MESSAGES > 0
 	char *str = variable_to_string(v);
-	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, v->worth);
+	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, w);
 	free(str);
 #endif
+
+	return w;
 }
 
 value **read_data(char *filename, size_t users, size_t days) {

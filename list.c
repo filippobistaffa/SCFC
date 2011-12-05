@@ -139,6 +139,7 @@ size_t list_size(struct list *h) {
 size_t equals(struct list *h, struct list *k) {
 
 	if (h && k)	return (h->i == k->i) && equals(h->n, k->n);
+	return h == k;
 }
 
 size_t index_of(struct list *h, void *i, size_t(*eq)(void *, void *)) {

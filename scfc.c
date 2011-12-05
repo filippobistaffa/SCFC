@@ -26,17 +26,33 @@ void run_agents(agent **agents, size_t n, void *(*routine)(void *)) {
 int main(int argc, char *argv[]) {
 
 	size_t i, n, r = 0;
-	agent **agents = read_dot("/home/liquidator/data/scalefreenetwork.dot", &n);
-	read_vars("/home/liquidator/data/coalitions.txt", agents);
+	agent **agents = read_dot("/home/liquidator/scalefreenetwork.dot", &n);
+	read_vars("/home/liquidator/coalitions.txt", agents);
 
 	for (i = 1; i < n; i++)
 		if (agents[i]->d > agents[r]->d) r = i;
+
+	printf("root = %zu\n", r);
 
 	agents[r]->r = 1;
 	run_agents(agents, n, compute_dfs);
 
 	agents[r]->pt = compute_pt(agents[r]);
 	run_agents(agents, n, compute_vars);
+
+/*	for (i = 0; i < n; i++) {
+		printf("Agent %zu (%zu local vars)\n", agents[i]->id, agents[i]->l);
+		print_list(LIST(agents[i]->vars), variable_to_string);
+	}*/
+
+	value **data = read_data("/home/liquidator/20090112.csv", n, 1);
+
+	for (i = 0; i < n; i++)
+		compute_luf(agents[i], data, n, 1, compute_ldf);
+
+	free_data(data, n);
+
+	run_agents(agents, n, compute_scf);
 
 	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
 	return 0;

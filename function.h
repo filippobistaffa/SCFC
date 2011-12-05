@@ -26,7 +26,7 @@
 struct variable {
 
 	agent_list *agents;
-	value worth;
+//	value worth;
 };
 
 struct row {

@@ -12,19 +12,10 @@ function *joint_sum(function *f1, function *f2) {
 	sum->vars = calloc(sum->m, sizeof(agent **));
 	sum->rows = malloc(r * sizeof(row *));
 
-	size_t i, j, k, t;
+	size_t i, j, k, t, w;
 	size_t s = f1->n, sh[f2->n];
 
 	sum->vars = VAR_LIST(copy_list(LIST(f1->vars)));
-
-	//puts("ciao");
-//	print_var_list(f2->vars);
-	//puts("ciao");
-
-	//	for (i = 0; i < f1->n; i++) {
-	//		if (!sum->vars[i / BLOCK_BITSIZE]) sum->vars[i / BLOCK_BITSIZE] = malloc(BLOCK_BITSIZE * sizeof(agent *));
-	//		VAR(sum, i) = VAR(f1, i);
-	//	}
 
 	for (j = 0; j < f2->n; j++) {
 		for (i = 0; i < f1->n; i++)
@@ -35,8 +26,6 @@ function *joint_sum(function *f1, function *f2) {
 			}
 
 		add(LIST(sum->vars), VAR(f2, j));
-
-		//	VAR(sum, s) = VAR(f2, j);
 		sh[j] = s++;
 		loop: ;
 	}
@@ -46,10 +35,10 @@ function *joint_sum(function *f1, function *f2) {
 	sum->vars = realloc(sum->vars, sum->m * sizeof(agent **));
 
 	t = THREAD_NUMBER;
-	j = 0;
+	j = 0, w = 0;
+	t = 1;
 
 	pthread_t threads[t];
-	void *status;
 
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
@@ -72,12 +61,13 @@ function *joint_sum(function *f1, function *f2) {
 		j++;
 
 		if (i + 1 == f1->r || j == t) {
-			if (i + 1 > t) {
+
+			if (w) {
 #if THREAD_MESSAGES > 0
 				printf("[ JSUM ] Waiting %zu Threads\n", t);
 #endif
 				for (k = 0; k < t; k++)
-					pthread_join(threads[k], &status);
+					pthread_join(threads[k], NULL);
 			}
 
 #if THREAD_MESSAGES > 0
@@ -86,6 +76,7 @@ function *joint_sum(function *f1, function *f2) {
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_joint_sum, data[k]);
 
+			w = 1;
 			if (i + 1 != f1->r) j = 0;
 		}
 	}
@@ -95,7 +86,7 @@ function *joint_sum(function *f1, function *f2) {
 #endif
 
 	for (k = 0; k < j; k++)
-		pthread_join(threads[k], &status);
+		pthread_join(threads[k], NULL);
 
 	pthread_mutex_destroy(&mutex);
 	sum->rows = realloc(sum->rows, sum->r * sizeof(row *));
@@ -120,7 +111,7 @@ function *maximize(agent *a) {
 	max->m = CEIL((float) max->n / BLOCK_BITSIZE);
 	max->vars = VAR_LIST(remove_first(copy_list(LIST(a->pf->vars)), a->l));
 
-	size_t i, j, k;
+	size_t i, j, k, w;
 	row **rows = malloc(a->pf->r * sizeof(row *));
 
 	for (i = 0; i < a->pf->r; i++) {
@@ -133,30 +124,30 @@ function *maximize(agent *a) {
 
 	size_t t = THREAD_NUMBER;
 	pthread_t threads[t];
-	void *status;
 
 #if THREAD_MESSAGES > 0
 	printf("[ MAXI ] Using Blocks Of %zu Threads\n", t);
 #endif
 
 	shift_data *s_data[t];
-	j = 0;
+	j = 0, w = 0;
 
 	for (i = 0; i < a->pf->r; i++) {
 
 		s_data[j] = malloc(sizeof(shift_data));
 		s_data[j]->blocks = rows[i]->blocks;
-		s_data[j]->n = a->pf->n;
+		s_data[j]->m = a->pf->m;
 		s_data[j]->l = a->l;
 		j++;
 
 		if (i + 1 == a->pf->r || j == t) {
-			if (i + 1 > t) {
+
+			if (w) {
 #if THREAD_MESSAGES > 0
 				printf("[RSHIFT] Waiting %zu Threads\n", t);
 #endif
 				for (k = 0; k < t; k++)
-					pthread_join(threads[k], &status);
+					pthread_join(threads[k], NULL);
 			}
 
 #if THREAD_MESSAGES > 0
@@ -165,6 +156,7 @@ function *maximize(agent *a) {
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_shift, s_data[k]);
 
+			w = 1;
 			if (i + 1 != a->pf->r) j = 0;
 		}
 	}
@@ -174,18 +166,17 @@ function *maximize(agent *a) {
 #endif
 
 	for (k = 0; k < j; k++)
-		pthread_join(threads[k], &status);
+		pthread_join(threads[k], NULL);
 
 	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
-	size_t r = a->pf->r;
+	size_t h, r = a->pf->r;
 	max->rows = malloc(r * sizeof(row *));
 
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 
 	max_data *m_data[t];
-	size_t h = 0;
-	j = 0;
+	w = 0, h = 0, j = 0;
 
 	for (i = 0; i <= a->pf->r; i++) {
 
@@ -201,12 +192,13 @@ function *maximize(agent *a) {
 		j++;
 
 		if (i == a->pf->r || j == t) {
-			if (i > t) {
+
+			if (w) {
 #if THREAD_MESSAGES > 0
 				printf("[ MAXI ] Waiting %zu Threads\n", t);
 #endif
 				for (k = 0; k < t; k++)
-					pthread_join(threads[k], &status);
+					pthread_join(threads[k], NULL);
 			}
 
 #if THREAD_MESSAGES > 0
@@ -215,6 +207,7 @@ function *maximize(agent *a) {
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_maximize, m_data[k]);
 
+			w = 1;
 			if (i != a->pf->r) j = 0;
 		}
 	}
@@ -224,7 +217,7 @@ function *maximize(agent *a) {
 #endif
 
 	for (k = 0; k < j; k++)
-		pthread_join(threads[k], &status);
+		pthread_join(threads[k], NULL);
 
 	pthread_mutex_destroy(&mutex);
 	max->rows = realloc(max->rows, max->r * sizeof(row *));
@@ -245,7 +238,7 @@ function *maximize(agent *a) {
 
 void get_arg_max(agent *a) {
 
-	size_t i, j, k, t;
+	size_t i, j, k, t, w;
 	size_t s = a->pf->n;
 	size_t sh[a->p->pf->n];
 
@@ -261,12 +254,9 @@ void get_arg_max(agent *a) {
 	}
 
 	t = THREAD_NUMBER;
-	j = 0;
+	j = 0, w = 0;
 
-	a->assignment = NULL;
 	pthread_t threads[t];
-	void *status;
-
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 
@@ -287,12 +277,12 @@ void get_arg_max(agent *a) {
 		j++;
 
 		if (i + 1 == a->pf->r || j == t) {
-			if (i + 1 > t) {
+			if (w) {
 #if THREAD_MESSAGES > 0
 				printf("[ARGMAX] Waiting %zu Threads\n", t);
 #endif
 				for (k = 0; k < t; k++)
-					pthread_join(threads[k], &status);
+					pthread_join(threads[k], NULL);
 			}
 
 #if THREAD_MESSAGES > 0
@@ -301,6 +291,7 @@ void get_arg_max(agent *a) {
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_arg_max, data[k]);
 
+			w = 1;
 			if (i + 1 != a->pf->r) j = 0;
 		}
 	}
@@ -310,7 +301,7 @@ void get_arg_max(agent *a) {
 #endif
 
 	for (k = 0; k < j; k++)
-		pthread_join(threads[k], &status);
+		pthread_join(threads[k], NULL);
 
 #if ALGORITHM_MESSAGES > 0
 	char *str = assignment_to_string(a);

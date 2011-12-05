@@ -6,12 +6,13 @@
 struct agent {
 
 	size_t id;
-	size_t n;
-	size_t l;
-	size_t d;
-	size_t r;
+	size_t n; // # vars
+	size_t l; // # local vars
+	size_t d; // degree
+	size_t r; // is root
 	size_t ch_n; // # children
 	size_t ch_id;
+	size_t level;
 
 	function *luf, *pf;
 	var_list *vars;
@@ -38,7 +39,7 @@ char *assignment_to_string(agent *a);
 char *variable_to_string(void *v);
 char *agent_to_string(void *x);
 
-void compute_payment(agent *a);
-void create_luf(agent *a);
+void compute_payment(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex);
+void compute_luf(agent *a, value **data, size_t users, size_t days, value (*worth)(variable *, value **, size_t, size_t));
 
 #endif /* AGENT_H_ */

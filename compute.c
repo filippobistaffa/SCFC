@@ -3,11 +3,20 @@
 void *compute_shift(void *d) {
 
 	shift_data *data = d;
-	size_t i;
+	size_t i, k = data->l / (sizeof(row_block) * 8);
 
-	for (i = 0; i < data->n; i++) {
-		data->blocks[i] >>= data->l;
+	if (k) {
+		for (i = 0; i < data->m; i++)
+			if (i + k >= data->m)
+				data->blocks[i] = 0;
+			else
+				data->blocks[i] = data->blocks[i + k];
+		data->l -= k * 8 * sizeof(row_block);
+	}
+
+	for (i = 0; i < data->m; i++) {
 		if (i) data->blocks[i - 1] |= ((data->blocks[i]) & ((1 << data->l) - 1)) << (sizeof(row_block) * 8 - data->l);
+		data->blocks[i] >>= data->l;
 	}
 
 	free(data);
@@ -69,8 +78,7 @@ void *compute_arg_max(void *d) {
 
 	if (compatible(data->row, data->prow, data->sh)) {
 		pthread_mutex_lock(data->m);
-		if (!*(data->max_row) || data->row->v > (*(data->max_row))->v)
-			*(data->max_row) = data->row;
+		if (!*(data->max_row) || data->row->v > (*(data->max_row))->v) *(data->max_row) = data->row;
 		pthread_mutex_unlock(data->m);
 	}
 

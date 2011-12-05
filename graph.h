@@ -28,6 +28,7 @@ void read_vars(char *filename, agent **agents);
 agent **read_dot(char *filename, size_t *n);
 agent_list *compute_pt(agent *a);
 
+void *compute_scf(void *d);
 void *compute_dfs(void *d);
 void *compute_vars(void *d);
 
