@@ -46,6 +46,9 @@ int main(int argc, char *argv[]) {
 	free_data(data, n);
 	run_agents(agents, n, compute_scf);
 
+	for (i = 0; i < n; i++)
+		nuke(agents[i]->pf);
+
 	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
 	return 0;
 }
