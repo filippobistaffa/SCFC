@@ -25,7 +25,7 @@ value compute_worth(variable *v, value **data, size_t users, size_t days) {
 
 #if WORTH_MESSAGES > 0
 	char *str = variable_to_string(v);
-	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, w);
+	printf("\033[1;37m[INFO] W(%s) = %f\033[m\n", str, w);
 	free(str);
 #endif
 
@@ -73,7 +73,7 @@ value compute_ldf(variable *v, value **data, size_t users, size_t days) {
 
 #if WORTH_MESSAGES > 0
 	char *str = variable_to_string(v);
-	printf("\033[1;37m[ INFO ] W(%s) = %f\033[m\n", str, w);
+	printf("\033[1;37m[INFO] W(%s) = %f\033[m\n", str, w);
 	free(str);
 #endif
 
@@ -93,14 +93,14 @@ value **read_data(char *filename, size_t users, size_t days) {
 	FILE *f = fopen(filename, "rb");
 
 	if (!f) {
-		fprintf(stderr, "\033[1;31m[ERR0R!] %s Not Found\033[m\n", filename);
+		fprintf(stderr, "\033[1;31m[ERR!] %s Not Found\033[m\n", filename);
 		free(data);
 		data = NULL;
 		goto end;
 	}
 
 	if (!fread(buf, LINE_LENGTH, 1, f)) {
-		fprintf(stderr, "\033[1;31m[ERR0R!] %s Is Empty\033[m\n", filename);
+		fprintf(stderr, "\033[1;31m[ERR!] %s Is Empty\033[m\n", filename);
 		free(data);
 		data = NULL;
 		goto end;
@@ -121,7 +121,7 @@ value **read_data(char *filename, size_t users, size_t days) {
 			}
 
 			if (d + 1 != days && (!fread(buf, LINE_LENGTH, 1, f) || strncmp(buf, u, USER_LENGTH))) {
-				fprintf(stderr, "\033[1;31m[ERR0R!] Not Enough Days In %s\033[m\n", filename);
+				fprintf(stderr, "\033[1;31m[ERR!] Not Enough Days In %s\033[m\n", filename);
 				free(data);
 				data = NULL;
 				goto end;
@@ -131,7 +131,7 @@ value **read_data(char *filename, size_t users, size_t days) {
 		if (i + 1 != users) {
 			while (!strncmp(buf, u, USER_LENGTH))
 				if (!fread(buf, LINE_LENGTH, 1, f)) {
-					fprintf(stderr, "\033[1;31m[ERR0R!] Not Enough Users In %s\033[m\n", filename);
+					fprintf(stderr, "\033[1;31m[ERR!] Not Enough Users In %s\033[m\n", filename);
 					free(data);
 					data = NULL;
 					goto end;

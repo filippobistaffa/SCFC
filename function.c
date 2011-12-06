@@ -45,7 +45,7 @@ void subtract(function *f, value v) {
 void nuke(function *f) {
 
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] Free %zu Bytes\n", size(f));
+	printf("[MEMO] Free %zu Bytes\n", size(f));
 #endif
 
 	size_t i;

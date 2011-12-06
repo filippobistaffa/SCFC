@@ -23,7 +23,7 @@ agent **read_dot(char *filename, size_t *n) {
 	FILE *f = fopen(filename, "r");
 
 	if (!f) {
-		fprintf(stderr, "\033[1;31m[ERR0R!] %s Not Found\033[m\n", filename);
+		fprintf(stderr, "\033[1;31m[ERR!] %s Not Found\033[m\n", filename);
 		fclose(f);
 		return NULL;
 	}
@@ -71,7 +71,7 @@ void read_vars(char *filename, agent **agents) {
 	FILE *f = fopen(filename, "rb");
 
 	if (!f) {
-		fprintf(stderr, "\033[1;31m[ERR0R!] %s Not Found\033[m\n", filename);
+		fprintf(stderr, "\033[1;31m[ERR!] %s Not Found\033[m\n", filename);
 		fclose(f);
 		return;
 	}
@@ -213,7 +213,7 @@ void *compute_dfs(void *d) {
 	if (!a->r) send_token(a, a->p, data->cond, data->mutex);
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;35m[ A-%02zu ] DFS Successfully Completed\033[m\n", a->id);
+	printf("\033[1;35m[A-%02zu] DFS Successfully Completed\033[m\n", a->id);
 #endif
 
 	free(data);
@@ -223,7 +223,7 @@ void *compute_dfs(void *d) {
 void wait_req_msg(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;31m[ A-%02zu ] Waiting Require Message\033[m\n", a->id);
+	printf("\033[1;31m[A-%02zu] Waiting Require Message\033[m\n", a->id);
 #endif
 
 	pthread_mutex_lock(mutex);
@@ -232,7 +232,7 @@ void wait_req_msg(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 	pthread_mutex_unlock(mutex);
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;35m[ A-%02zu ] Require Message Received\033[m\n", a->id);
+	printf("\033[1;35m[A-%02zu] Require Message Received\033[m\n", a->id);
 #endif
 }
 
@@ -303,7 +303,7 @@ void *compute_vars(void *d) {
 		a->req = realloc(a->req, i * sizeof(size_t));
 
 #if MEMORY_MESSAGES > 0
-		printf("[MEMORY] A-%02zu Require Function = %zu Bytes\n", a->id, i * sizeof(size_t));
+		printf("[MEMO] A-%02zu Require Function = %zu Bytes\n", a->id, i * sizeof(size_t));
 #endif
 	}
 
@@ -355,7 +355,7 @@ void *compute_vars(void *d) {
 		}
 
 #if ALGORITHM_MESSAGES > 0
-		printf("\033[1;33m[ A-%02zu ] Sending Require Message To A-%02zu\033[m\n", a->id, children->c->a->id);
+		printf("\033[1;33m[A-%02zu] Sending Require Message To A-%02zu\033[m\n", a->id, children->c->a->id);
 #endif
 		send_req_msg(a, i++, msg, data->cond, data->mutex);
 		children = children->n;
@@ -377,7 +377,7 @@ void *compute_vars(void *d) {
 void wait_dem_msgs(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;31m[ A-%02zu ] Waiting Demand Messages\033[m\n", a->id);
+	printf("\033[1;31m[A-%02zu] Waiting Demand Messages\033[m\n", a->id);
 #endif
 
 	size_t i, all;
@@ -402,14 +402,14 @@ void wait_dem_msgs(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 	pthread_mutex_unlock(mutex);
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;35m[ A-%02zu ] All Demand Messages Received\033[m\n", a->id);
+	printf("\033[1;35m[A-%02zu] All Demand Messages Received\033[m\n", a->id);
 #endif
 }
 
 void send_dem_msg(agent *a, size_t id, function *msg, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;33m[ A-%02zu ] Sending Demand Message To A-%02zu\033[m\n", a->id, a->p->id);
+	printf("\033[1;33m[A-%02zu] Sending Demand Message To A-%02zu\033[m\n", a->id, a->p->id);
 #endif
 
 	pthread_mutex_lock(mutex);
@@ -426,7 +426,7 @@ void wait_parent_ass(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 	pthread_mutex_unlock(mutex);
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;35m[ A-%02zu ] Assignment Received From Parent\033[m\n", a->id);
+	printf("\033[1;35m[A-%02zu] Assignment Received From Parent\033[m\n", a->id);
 #endif
 }
 
@@ -446,7 +446,7 @@ void *compute_scf(void *d) {
 		for (i = 0; i < a->ch_n; i++) {
 
 #if ALGORITHM_MESSAGES > 0
-			printf("\033[1;37m[ A-%02zu ] Computing Payment Function (%zu / %zu)\033[m\n", a->id, i + 1, a->ch_n);
+			printf("\033[1;37m[A-%02zu] Computing Payment Function (%zu / %zu)\033[m\n", a->id, i + 1, a->ch_n);
 #endif
 			pf = joint_sum(a->pf, a->dem_msgs[i]);
 			nuke(a->pf);

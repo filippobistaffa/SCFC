@@ -64,7 +64,7 @@ char *agent_to_string(void *x) {
 void compute_luf(agent *a, value **data, size_t users, size_t days, value (*worth)(variable *, value **, size_t, size_t)) {
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;37m[ A-%02zu ] Creating LUF Function\033[m\n", a->id);
+	printf("\033[1;37m[A-%02zu] Creating LUF Function\033[m\n", a->id);
 #endif
 
 	size_t i;
@@ -98,7 +98,7 @@ void compute_luf(agent *a, value **data, size_t users, size_t days, value (*wort
 	if (a->req) free(a->req);
 
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] A-%02zu LUF Function = %zu Bytes\n", a->id, size(luf));
+	printf("[MEMO] A-%02zu LUF Function = %zu Bytes\n", a->id, size(luf));
 #endif
 
 	a->luf = luf;
@@ -117,12 +117,12 @@ void compute_payment(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 #if ALGORITHM_MESSAGES > 0
 		char *str = assignment_to_string(a);
-		printf("\033[1;36m[ A-%02zu ] Active Local Variables = %s\033[m\n", a->id, str);
+		printf("\033[1;36m[A-%02zu] Active Local Variables = %s\033[m\n", a->id, str);
 		free(str);
 #endif
 	}
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;32m[ A-%02zu ] Payment = %f\033[m\n", a->id, a->payment);
+	printf("\033[1;32m[A-%02zu] Payment = %f\033[m\n", a->id, a->payment);
 #endif
 }

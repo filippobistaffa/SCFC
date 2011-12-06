@@ -12,8 +12,8 @@ struct sum_data {
 
 struct shift_data {
 
-	row_block *blocks;
-	size_t m, l;
+	size_t a, b, l;
+	row **rows;
 };
 
 struct max_data {
@@ -24,13 +24,11 @@ struct max_data {
 	row **rows;
 };
 
-
 struct arg_data {
 
+	row **max_row, **rows, *prow;
 	pthread_mutex_t *m;
-	row *row, *prow;
-	row **max_row;
-	size_t *sh;
+	size_t a, b, *sh;
 };
 
 void *compute_shift(void *d);

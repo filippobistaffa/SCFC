@@ -3,20 +3,23 @@
 void *compute_shift(void *d) {
 
 	shift_data *data = d;
-	size_t i, k = data->l / (sizeof(row_block) * 8);
+	size_t i, j, k = data->l / (sizeof(row_block) * 8);
 
-	if (k) {
-		for (i = 0; i < data->m; i++)
-			if (i + k >= data->m)
-				data->blocks[i] = 0;
-			else
-				data->blocks[i] = data->blocks[i + k];
-		data->l -= k * 8 * sizeof(row_block);
-	}
+	for (i = data->a; i <= data->b; i++) {
 
-	for (i = 0; i < data->m; i++) {
-		if (i) data->blocks[i - 1] |= ((data->blocks[i]) & ((1 << data->l) - 1)) << (sizeof(row_block) * 8 - data->l);
-		data->blocks[i] >>= data->l;
+		if (k) {
+			for (j = 0; j < data->rows[i]->m; j++)
+				if (j + k >= data->rows[i]->m)
+					data->rows[i]->blocks[j] = 0;
+				else
+					data->rows[i]->blocks[j] = data->rows[i]->blocks[j + k];
+			data->l -= k * 8 * sizeof(row_block);
+		}
+
+		for (j = 0; j < data->rows[i]->m; j++) {
+			if (j) data->rows[i]->blocks[j - 1] |= ((data->rows[i]->blocks[j]) & ((1 << data->l) - 1)) << (sizeof(row_block) * 8 - data->l);
+			data->rows[i]->blocks[j] >>= data->l;
+		}
 	}
 
 	free(data);
@@ -76,12 +79,14 @@ void *compute_joint_sum(void *d) {
 void *compute_arg_max(void *d) {
 
 	arg_data *data = d;
+	size_t i;
 
-	if (compatible(data->row, data->prow, data->sh)) {
-		pthread_mutex_lock(data->m);
-		if (!*(data->max_row) || data->row->v > (*(data->max_row))->v) *(data->max_row) = data->row;
-		pthread_mutex_unlock(data->m);
-	}
+	for (i = data->a; i <= data->b; i++)
+		if (compatible(data->rows[i], data->prow, data->sh)) {
+			pthread_mutex_lock(data->m);
+			if (!*(data->max_row) || data->rows[i]->v > (*(data->max_row))->v) *(data->max_row) = data->rows[i];
+			pthread_mutex_unlock(data->m);
+		}
 
 	free(data);
 	pthread_exit(NULL);

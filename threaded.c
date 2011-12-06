@@ -46,13 +46,13 @@ function *joint_sum(function *f1, function *f2) {
 	}
 
 #if THREAD_MESSAGES > 0
-	printf("[ JSUM ] Using Blocks Of %zu Threads\n", t);
+	printf("[JSUM] Using Blocks Of %zu Threads\n", t);
 #endif
 
+	sum_data *data[t];
 	pthread_t threads[t];
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
-	sum_data *data[t];
 
 	for (i = 0; i < t; i++) {
 
@@ -75,7 +75,7 @@ function *joint_sum(function *f1, function *f2) {
 	sum->rows = realloc(sum->rows, sum->r * sizeof(row *));
 
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] Sum Function Dimension = %zu bytes\n", size(sum));
+	printf("[MEMO] Sum Function Dimension = %zu bytes\n", size(sum));
 #endif
 
 	free(sh);
@@ -85,17 +85,10 @@ function *joint_sum(function *f1, function *f2) {
 function *maximize(agent *a) {
 
 #if ALGORITHM_MESSAGES > 0
-	printf("\033[1;37m[ A-%02zu ] Creating Demand Message\033[m\n", a->id);
+	printf("\033[1;37m[A-%02zu] Creating Demand Message\033[m\n", a->id);
 #endif
 
-	function *max = malloc(sizeof(function));
-
-	max->r = 0;
-	max->n = a->pf->n - a->l;
-	max->m = CEIL((float) max->n / BLOCK_BITSIZE);
-	max->vars = VAR_LIST(remove_first(copy_list(LIST(a->pf->vars)), a->l));
-
-	size_t i, j, k, w;
+	size_t i, k, t;
 	row **rows = malloc(a->pf->r * sizeof(row *));
 
 	for (i = 0; i < a->pf->r; i++) {
@@ -106,61 +99,51 @@ function *maximize(agent *a) {
 		memcpy(rows[i]->blocks, a->pf->rows[i]->blocks, rows[i]->m * sizeof(row_block));
 	}
 
-	size_t t = THREAD_NUMBER;
-	pthread_t threads[t];
-
-#if THREAD_MESSAGES > 0
-	printf("[ MAXI ] Using Blocks Of %zu Threads\n", t);
-#endif
-
-	shift_data *s_data[t];
-	j = 0, w = 0;
-
-	for (i = 0; i < a->pf->r; i++) {
-
-		s_data[j] = malloc(sizeof(shift_data));
-		s_data[j]->blocks = rows[i]->blocks;
-		s_data[j]->m = a->pf->m;
-		s_data[j]->l = a->l;
-		j++;
-
-		if (i + 1 == a->pf->r || j == t) {
-
-			if (w) {
-#if THREAD_MESSAGES > 0
-				printf("[RSHIFT] Waiting %zu Threads\n", t);
-#endif
-				for (k = 0; k < t; k++)
-					pthread_join(threads[k], NULL);
-			}
-
-#if THREAD_MESSAGES > 0
-			printf("[RSHIFT] Starting %zu Threads\n", j);
-#endif
-			for (k = 0; k < j; k++)
-				pthread_create(&threads[k], NULL, compute_shift, s_data[k]);
-
-			w = 1;
-			if (i + 1 != a->pf->r) j = 0;
-		}
+	if (a->pf->r > THREAD_NUMBER) {
+		t = THREAD_NUMBER;
+		k = a->pf->r / t;
+	} else {
+		t = a->pf->r;
+		k = 1;
 	}
 
+	pthread_t threads[t];
+	shift_data *s_data[t];
+
 #if THREAD_MESSAGES > 0
-	printf("[RSHIFT] Waiting %zu Final Threads\n", j);
+	printf("[R-SH] Using Blocks Of %zu Threads\n", t);
 #endif
 
-	for (k = 0; k < j; k++)
-		pthread_join(threads[k], NULL);
+	for (i = 0; i < t; i++) {
+
+		s_data[i] = malloc(sizeof(shift_data));
+		s_data[i]->rows = rows;
+		s_data[i]->l = a->l;
+		s_data[i]->a = i * k;
+		s_data[i]->b = (i == t - 1) ? (a->pf->r - 1) : ((i + 1) * k - 1);
+
+		pthread_create(&threads[i], NULL, compute_shift, s_data[i]);
+	}
+
+	for (i = 0; i < t; i++)
+		pthread_join(threads[i], NULL);
 
 	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
-	size_t h, r = a->pf->r;
+
+	size_t h, j, p, r = a->pf->r;
+	function *max = malloc(sizeof(function));
+
+	max->r = 0;
+	max->n = a->pf->n - a->l;
+	max->m = CEIL((float) max->n / BLOCK_BITSIZE);
+	max->vars = VAR_LIST(remove_first(copy_list(LIST(a->pf->vars)), a->l));
 	max->rows = malloc(r * sizeof(row *));
 
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 
 	max_data *m_data[t];
-	w = 0, h = 0, j = 0;
+	h = 0, j = 0, p = 0;
 
 	for (i = 0; i <= a->pf->r; i++) {
 
@@ -177,27 +160,27 @@ function *maximize(agent *a) {
 
 		if (i == a->pf->r || j == t) {
 
-			if (w) {
-#if THREAD_MESSAGES > 0
-				printf("[ MAXI ] Waiting %zu Threads\n", t);
+			if (p) {
+#if THREAD_MESSAGES > 1
+				printf("[MAXI] Waiting %zu Threads\n", t);
 #endif
 				for (k = 0; k < t; k++)
 					pthread_join(threads[k], NULL);
 			}
 
-#if THREAD_MESSAGES > 0
-			printf("[ MAXI ] Starting %zu Threads\n", j);
+#if THREAD_MESSAGES > 1
+			printf("[MAXI] Starting %zu Threads\n", j);
 #endif
 			for (k = 0; k < j; k++)
 				pthread_create(&threads[k], NULL, compute_maximize, m_data[k]);
 
-			w = 1;
+			p = 1;
 			if (i != a->pf->r) j = 0;
 		}
 	}
 
-#if THREAD_MESSAGES > 0
-	printf("[ MAXI ] Waiting %zu Final Threads\n", j);
+#if THREAD_MESSAGES > 1
+	printf("[MAXI] Waiting %zu Final Threads\n", j);
 #endif
 
 	for (k = 0; k < j; k++)
@@ -214,7 +197,7 @@ function *maximize(agent *a) {
 	free(rows);
 
 #if MEMORY_MESSAGES > 0
-	printf("[MEMORY] Demand Message Dimension = %zu bytes\n", size(max));
+	printf("[MEMO] Demand Message Dimension = %zu bytes\n", size(max));
 #endif
 
 	return max;
@@ -222,64 +205,49 @@ function *maximize(agent *a) {
 
 void get_arg_max(agent *a) {
 
-	size_t i, j, k, s, t, w;
+	size_t i, k, s, t;
 	size_t *sh = shared(a->pf, a->p->pf, &s, NULL);
 
-	t = THREAD_NUMBER;
-	j = 0, w = 0;
+	if (a->pf->r > THREAD_NUMBER) {
+		t = THREAD_NUMBER;
+		k = a->pf->r / t;
+	} else {
+		t = a->pf->r;
+		k = 1;
+	}
 
+#if THREAD_MESSAGES > 0
+	printf("[AMAX] Using Blocks Of %zu Threads\n", t);
+#endif
+
+	arg_data *data[t];
 	pthread_t threads[t];
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
 
-#if THREAD_MESSAGES > 0
-	printf("[ARGMAX] Using Blocks Of %zu Threads\n", t);
-#endif
+	for (i = 0; i < t; i++) {
 
-	arg_data *data[t];
+		data[i] = malloc(sizeof(arg_data));
+		data[i]->max_row = &(a->assignment);
+		data[i]->prow = a->p->assignment;
+		data[i]->rows = a->pf->rows;
+		data[i]->sh = sh;
+		data[i]->a = i * k;
+		data[i]->m = &mutex;
+		data[i]->b = (i == t - 1) ? (a->pf->r - 1) : ((i + 1) * k - 1);
 
-	for (i = 0; i < a->pf->r; i++) {
-
-		data[j] = malloc(sizeof(arg_data));
-		data[j]->max_row = &(a->assignment);
-		data[j]->prow = a->p->assignment;
-		data[j]->row = a->pf->rows[i];
-		data[j]->m = &mutex;
-		data[j]->sh = sh;
-		j++;
-
-		if (i + 1 == a->pf->r || j == t) {
-			if (w) {
-#if THREAD_MESSAGES > 0
-				printf("[ARGMAX] Waiting %zu Threads\n", t);
-#endif
-				for (k = 0; k < t; k++)
-					pthread_join(threads[k], NULL);
-			}
-
-#if THREAD_MESSAGES > 0
-			printf("[ARGMAX] Starting %zu Threads\n", j);
-#endif
-			for (k = 0; k < j; k++)
-				pthread_create(&threads[k], NULL, compute_arg_max, data[k]);
-
-			w = 1;
-			if (i + 1 != a->pf->r) j = 0;
-		}
+		pthread_create(&threads[i], NULL, compute_arg_max, data[i]);
 	}
 
-#if THREAD_MESSAGES > 0
-	printf("[ARGMAX] Waiting %zu Final Threads\n", j);
-#endif
-
-	for (k = 0; k < j; k++)
-		pthread_join(threads[k], NULL);
+	for (i = 0; i < t; i++)
+		pthread_join(threads[i], NULL);
 
 #if ALGORITHM_MESSAGES > 0
 	char *str = assignment_to_string(a);
-	printf("\033[1;36m[ A-%02zu ] Active Local Variables = %s\033[m\n", a->id, str);
+	printf("\033[1;36m[A-%02zu] Active Local Variables = %s\033[m\n", a->id, str);
 	free(str);
 #endif
 
+	free(sh);
 	pthread_mutex_destroy(&mutex);
 }
