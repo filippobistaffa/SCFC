@@ -77,7 +77,7 @@ void compute_luf(agent *a, value **data, size_t users, size_t days, value (*wort
 	luf->vars = VAR_LIST(copy_list(LIST(a->vars)));
 
 	for (i = 0; i < luf->r; i++) {
-		luf->rows[i] = malloc(sizeof(row));
+		luf->rows[i] = calloc(1, sizeof(row));
 		luf->rows[i]->blocks = calloc(luf->m, sizeof(row_block));
 		luf->rows[i]->m = luf->m;
 		luf->rows[i]->n = luf->n;

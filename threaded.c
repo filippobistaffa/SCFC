@@ -2,7 +2,7 @@
 
 size_t *shared(function *f1, function *f2, size_t *n, var_list *s) {
 
-	size_t i, j, *sh = calloc(1, f2->n * sizeof(size_t));
+	size_t i, j, *sh = malloc(f2->n * sizeof(size_t));
 	var_list *h, *k = f2->vars;
 	*n = f1->n;
 	j = 0;

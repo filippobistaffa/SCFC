@@ -248,12 +248,12 @@ void *compute_vars(void *d) {
 
 	msg_data *data = (msg_data *) d;
 	agent *a = data->a;
-	size_t i = 0;
 
 	var_list *non_local = NULL;
-
-	agent_list *inter;
 	tuple_list *tuples;
+	agent_list *inter;
+	size_t i = 0;
+
 	a->req_msgs = calloc(a->ch_n, sizeof(tuple_list *));
 
 	if (a->p) {
@@ -441,12 +441,13 @@ void *compute_scf(void *d) {
 
 		wait_dem_msgs(a, data->cond, data->mutex);
 
-#if ALGORITHM_MESSAGES > 0
-		printf("\033[1;37m[ A-%02zu ] Computing Payment Function\033[m\n", a->id);
-#endif
 		function *pf;
 
 		for (i = 0; i < a->ch_n; i++) {
+
+#if ALGORITHM_MESSAGES > 0
+			printf("\033[1;37m[ A-%02zu ] Computing Payment Function (%zu / %zu)\033[m\n", a->id, i + 1, a->ch_n);
+#endif
 			pf = joint_sum(a->pf, a->dem_msgs[i]);
 			nuke(a->pf);
 			nuke(a->dem_msgs[i]);
@@ -467,8 +468,6 @@ void *compute_scf(void *d) {
 		pthread_cond_broadcast(data->cond);
 		pthread_mutex_unlock(data->mutex);
 	}
-
-	//if (a->ch_n) nuke(a->pf);
 
 	free(data);
 	pthread_exit(NULL);
