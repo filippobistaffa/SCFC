@@ -24,7 +24,7 @@ struct tuple {
 	agent_list *agents;
 };
 
-void read_vars(char *filename, agent **agents);
+size_t read_vars(char *filename, agent **agents);
 agent **read_dot(char *filename, size_t *n);
 agent_list *compute_pt(agent *a);
 

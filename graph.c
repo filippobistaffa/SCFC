@@ -24,7 +24,6 @@ agent **read_dot(char *filename, size_t *n) {
 
 	if (!f) {
 		fprintf(stderr, "\033[1;31m[ERR!] %s Not Found\033[m\n", filename);
-		fclose(f);
 		return NULL;
 	}
 
@@ -66,14 +65,13 @@ agent **read_dot(char *filename, size_t *n) {
 	return realloc(agents, *n * sizeof(agent));
 }
 
-void read_vars(char *filename, agent **agents) {
+size_t read_vars(char *filename, agent **agents) {
 
 	FILE *f = fopen(filename, "rb");
 
 	if (!f) {
 		fprintf(stderr, "\033[1;31m[ERR!] %s Not Found\033[m\n", filename);
-		fclose(f);
-		return;
+		return 1;
 	}
 
 	char *id = calloc(1, BLOCK);
@@ -112,6 +110,7 @@ void read_vars(char *filename, agent **agents) {
 	free(id);
 	free(buf);
 	fclose(f);
+	return 0;
 }
 
 agent_list *compute_pt(agent *a) {

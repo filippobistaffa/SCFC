@@ -26,8 +26,11 @@ void run_agents(agent **agents, size_t n, void *(*routine)(void *)) {
 int main(int argc, char *argv[]) {
 
 	size_t i, n, r = 0;
-	agent **agents = read_dot("/home/liquidator/scalefreenetwork.dot", &n);
-	read_vars("/home/liquidator/coalitions.txt", agents);
+	agent **agents;
+	value **data;
+
+	if (!(agents = read_dot("/home/liquidator/scalefreenetwork.dot", &n))) return 1;
+	if (read_vars("/home/liquidator/coalitions.txt", agents)) return 1;
 
 	for (i = 1; i < n; i++)
 		if (agents[i]->d > agents[r]->d) r = i;
@@ -38,7 +41,7 @@ int main(int argc, char *argv[]) {
 	agents[r]->pt = compute_pt(agents[r]);
 	run_agents(agents, n, compute_vars);
 
-	value **data = read_data("/home/liquidator/20090112.csv", n, 1);
+	if (!(data = read_data("/home/liquidator/20090112.csv", n, 1))) return 1;
 
 	for (i = 0; i < n; i++)
 		compute_luf(agents[i], data, n, 1, compute_ldf);

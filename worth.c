@@ -142,7 +142,7 @@ value **read_data(char *filename, size_t users, size_t days) {
 	end: free(v);
 	free(u);
 	free(buf);
-	fclose(f);
+	if (f) fclose(f);
 	return data;
 }
 

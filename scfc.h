@@ -8,7 +8,7 @@
  */
 
 #define ALGORITHM_MESSAGES 1
-#define THREAD_MESSAGES 1
+#define THREAD_MESSAGES 0
 #define MEMORY_MESSAGES 0
 #define WORTH_MESSAGES 0
 
