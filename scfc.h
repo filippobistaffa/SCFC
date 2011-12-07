@@ -13,11 +13,11 @@
 #define WORTH_MESSAGES 0
 
 /**
- * Constants
+ * Tuning parameters
  */
 
 #define THREADS_PER_CORE 1.5
-#define MAX_STRING_SIZE 1048576
+#define MAX_MEMORY 2147483648
 
 /**
  * Type Definition

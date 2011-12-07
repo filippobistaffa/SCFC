@@ -3,6 +3,8 @@
 
 #include "scfc.h"
 
+#define MAX_STRING_SIZE 1048576
+
 struct agent {
 
 	size_t id;

@@ -5,8 +5,6 @@
 #include "list.h"
 #include "compute.h"
 
-#define MAX_MEMORY 2147483648
-
 #define LIMIT_MEMORY(M) (M < MAX_MEMORY ? M : MAX_MEMORY)
 #define THREAD_NUMBER sysconf(_SC_NPROCESSORS_CONF) * THREADS_PER_CORE
 
