@@ -30,7 +30,7 @@ size_t *shared(function *f1, function *f2, size_t *n, var_list *s) {
 function *joint_sum(function *f1, function *f2) {
 
 	function *sum = malloc(sizeof(function));
-	sum->rows = malloc(f1->n * f2->n * sizeof(row *));
+	sum->rows = malloc(LIMIT_MEMORY(f1->r * f2->r * sizeof(row *)));
 	sum->vars = VAR_LIST(copy_list(LIST(f1->vars)));
 	sum->r = 0;
 	size_t *sh = shared(f1, f2, &(sum->n), sum->vars);
