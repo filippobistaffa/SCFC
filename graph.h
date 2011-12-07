@@ -7,7 +7,7 @@
 #include "listsort.h"
 
 #define BLOCK_NUMBER 1000
-#define MAX_AGENTS 200
+#define MAX_AGENTS 99
 #define BLOCK 3
 #define LINE 50
 
