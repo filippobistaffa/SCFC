@@ -1,5 +1,7 @@
 #include "graph.h"
 
+#include <sys/timeb.h>
+
 void add_neighbor(agent **agents, size_t a, size_t b) {
 
 	if (agents[a]->ngh) {
@@ -132,7 +134,7 @@ agent_list *compute_pt(agent *a) {
 		children = children->n;
 	}
 
-	return pt;
+	return AGENT_LIST(sort_list(LIST(pt), compare_ids));
 }
 
 void wait_token(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
@@ -278,8 +280,8 @@ void *compute_vars(void *d) {
 
 				while (vars) {
 
-					if (contains_all(LIST(tuples->t->agents), LIST(vars->v->agents))) {
-						inter = AGENT_LIST(retain_all(copy_list(LIST(vars->v->agents)), LIST(tuples->t->agents)));
+					if (contains_all_ordered(LIST(tuples->t->agents), LIST(vars->v->agents), compare_ids)) {
+						inter = AGENT_LIST(retain_all_ordered(LIST(vars->v->agents), LIST(tuples->t->agents), compare_ids));
 						if ((size = list_size(LIST(inter))) > max_size) {
 							if (max_size) free_list(LIST(max_inter));
 							max_inter = inter;
@@ -298,7 +300,7 @@ void *compute_vars(void *d) {
 				else
 					non_local = VAR_LIST(create_list(tuples->t->var));
 
-				tuples->t->agents = AGENT_LIST(remove_all(LIST(tuples->t->agents), LIST(max_inter)));
+				tuples->t->agents = AGENT_LIST(remove_all_ordered(LIST(tuples->t->agents), LIST(max_inter), compare_ids));
 			}
 
 			free(tuples->t);
@@ -343,7 +345,7 @@ void *compute_vars(void *d) {
 
 		while (tuples) {
 
-			inter = AGENT_LIST(retain_all(copy_list(LIST(tuples->t->agents)), LIST(children->c->a->pt)));
+			inter = AGENT_LIST(retain_all_ordered(LIST(tuples->t->agents), LIST(children->c->a->pt), compare_ids));
 
 			if (inter) {
 

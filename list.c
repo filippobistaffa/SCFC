@@ -31,6 +31,18 @@ struct list *find_item(struct list *h, void *a) {
 	return NULL;
 }
 
+size_t contains_all_ordered(struct list *h, struct list *k, int(*cmp)(struct list *, struct list *)) {
+
+	if (k) {
+		if (!h) return 0;
+		if (h->i == k->i) return contains_all_ordered(h->n, k->n, cmp);
+		if (cmp(h, k) > 0) return 0;
+		return contains_all_ordered(h->n, k, cmp);
+	}
+
+	return 1;
+}
+
 size_t contains_all(struct list *h, struct list *k) {
 
 	if (k) {
@@ -51,6 +63,20 @@ struct list *remove_item(struct list *h, void *a) {
 		return n;
 	} else if (h->n) h->n = remove_item(h->n, a);
 
+	return h;
+}
+
+struct list *remove_all_ordered(struct list *h, struct list *k, int(*cmp)(struct list *, struct list *)) {
+
+	if (k) {
+		if (h->i == k->i) {
+			struct list *n = h->n;
+			free(h);
+			return remove_all_ordered(n, k->n, cmp);
+		}
+		if (cmp(h, k) > 0) return remove_all_ordered(h, k->n, cmp);
+		h->n = remove_all_ordered(h->n, k, cmp);
+	}
 	return h;
 }
 
@@ -102,6 +128,19 @@ void add(struct list *h, void *i) {
 	}
 }
 
+struct list *retain_all_ordered(struct list *h, struct list *k, int(*cmp)(struct list *, struct list *)) {
+
+	if (!h || !k) return NULL;
+	if (h->i == k->i) {
+		struct list *hn = calloc(1, sizeof(struct list));
+		hn->i = h->i;
+		hn->n = retain_all_ordered(h->n, k->n, cmp);
+		return hn;
+	}
+	if (cmp(h, k) > 0) return retain_all_ordered(h, k->n, cmp);
+	return retain_all_ordered(h->n, k, cmp);
+}
+
 struct list *retain_all(struct list *h, struct list *r) {
 
 	if (!h) return NULL;
@@ -119,8 +158,8 @@ void print_list(struct list *h, char *(*f)(void *)) {
 		printf("%s ", str);
 		free(str);
 		print_list(h->n, f);
-	}
-	else puts("");
+	} else
+		puts("");
 }
 
 struct list *create_list(void *i) {
@@ -138,7 +177,7 @@ size_t list_size(struct list *h) {
 
 size_t equals(struct list *h, struct list *k) {
 
-	if (h && k)	return (h->i == k->i) && equals(h->n, k->n);
+	if (h && k) return (h->i == k->i) && equals(h->n, k->n);
 	return h == k;
 }
 
