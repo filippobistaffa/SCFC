@@ -246,6 +246,9 @@ void wait_req_msg(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
 void send_req_msg(agent *a, size_t id, tuple_list *msg, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
+#if ALGORITHM_MESSAGES > 0
+	printf("\033[1;33m[A-%02zu] Sending Require Message To A-%02zu\033[m\n", a->id, children->c->a->id);
+#endif
 	pthread_mutex_lock(mutex);
 	a->req_msgs[id] = msg;
 	pthread_cond_broadcast(cond);
@@ -362,9 +365,6 @@ void *compute_vars(void *d) {
 			tuples = tuples->n;
 		}
 
-#if ALGORITHM_MESSAGES > 0
-		printf("\033[1;33m[A-%02zu] Sending Require Message To A-%02zu\033[m\n", a->id, children->c->a->id);
-#endif
 		send_req_msg(a, i++, msg, data->cond, data->mutex);
 		children = children->n;
 	}
