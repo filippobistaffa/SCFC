@@ -65,6 +65,11 @@ agent **read_dot(char *filename, size_t *n) {
 	return realloc(agents, *n * sizeof(agent));
 }
 
+int compare_ids(struct list *h, struct list *k) {
+
+	return AGENT_LIST(h)->a->id - AGENT_LIST(k)->a->id;
+}
+
 size_t read_vars(char *filename, agent **agents) {
 
 	FILE *f = fopen(filename, "rb");
@@ -91,6 +96,8 @@ size_t read_vars(char *filename, agent **agents) {
 				v->agents = AGENT_LIST(create_list(agents[atoi(id)]));
 
 			if (buf[(i + 1) * BLOCK - 1] == '\n' || buf[(i + 1) * BLOCK - 1] == '\r') {
+
+				v->agents = AGENT_LIST(sort_list(LIST(v->agents), compare_ids));
 
 				if (agents[a]->vars)
 					add(LIST(agents[a]->vars), v);
