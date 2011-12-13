@@ -453,7 +453,7 @@ void *compute_scf(void *d) {
 			printf("\033[1;37m[A-%02zu] Computing Payment Function (%zu / %zu)\033[m\n", a->id, i + 1, a->ch_n);
 #endif
 			pf = joint_sum(a->pf, a->dem_msgs[i]);
-			if (i) nuke(a->pf);
+			nuke(a->pf);
 			nuke(a->dem_msgs[i]);
 			a->pf = pf;
 		}
@@ -476,4 +476,3 @@ void *compute_scf(void *d) {
 	free(data);
 	pthread_exit(NULL);
 }
-
