@@ -52,6 +52,8 @@ int main(int argc, char *argv[]) {
 	for (i = 0; i < n; i++)
 		nuke(agents[i]->pf);
 
+	write_xml_output(agents[r], n, "/home/liquidator/output.xml");
+
 	printf("\033[1;32mNiente segmentation fault, l'avaressito mai dito?\033[m\n");
 	return 0;
 }

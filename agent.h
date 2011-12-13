@@ -3,8 +3,6 @@
 
 #include "scfc.h"
 
-#define MAX_STRING_SIZE 1048576
-
 struct agent {
 
 	size_t id;
@@ -16,6 +14,8 @@ struct agent {
 	size_t ch_id;
 	size_t level;
 
+	variable *v;
+
 	function *luf, *pf;
 	var_list *vars;
 	size_t *req;
@@ -24,7 +24,7 @@ struct agent {
 	tuple_list **req_msgs;
 
 	row *assignment;
-	value payment;
+	value payment, single;
 
 	agent_list *nv, *ngh, *pp, *pt, *token;
 	agent *p, *sender;
@@ -37,7 +37,7 @@ struct child {
 	agent_list *pch;
 };
 
-char *assignment_to_string(agent *a);
+void active_local_variable(agent *a);
 char *variable_to_string(void *v);
 char *agent_to_string(void *x);
 

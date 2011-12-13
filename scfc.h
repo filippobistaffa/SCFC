@@ -10,7 +10,7 @@
 #define ALGORITHM_MESSAGES 1
 #define THREAD_MESSAGES 0
 #define MEMORY_MESSAGES 0
-#define WORTH_MESSAGES 0
+#define WORTH_MESSAGES 1
 
 /**
  * Tuning parameters
@@ -54,6 +54,7 @@ typedef agent item;
  */
 
 #include "function.h"
+#include "output.h"
 #include "agent.h"
 #include "graph.h"
 #include "list.h"

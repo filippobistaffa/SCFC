@@ -26,6 +26,7 @@
 struct variable {
 
 	agent_list *agents;
+	value w;
 };
 
 struct row {

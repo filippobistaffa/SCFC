@@ -1,23 +1,14 @@
 #include "agent.h"
 
-char *assignment_to_string(agent *a) {
+void active_local_variable(agent *a) {
 
-	char *var, *str = malloc(MAX_STRING_SIZE);
-	size_t i, l, j = 0;
-	str[j++] = '{';
+	size_t i;
 
 	for (i = 0; i < a->l; i++)
 		if (GETBIT(a->assignment, i)) {
-			var = variable_to_string(VAR(a->pf, i));
-			l = strlen(var);
-			memcpy(str + j, var, l);
-			strcpy(str + j + l, " ,");
-			j += (l + 2);
-			free(var);
+			a->v = VAR(a->pf, i);
+			break;
 		}
-
-	strcpy(str + j - 2, "}");
-	return realloc(str, strlen(str) + 1);
 }
 
 char *variable_to_string(void *x) {
@@ -61,7 +52,7 @@ char *agent_to_string(void *x) {
 	return str;
 }
 
-void compute_luf(agent *a, value **data, size_t users, size_t days, value (*worth)(variable *, value **, size_t, size_t)) {
+void compute_luf(agent *a, value **data, size_t users, size_t days, value(*worth)(variable *, value **, size_t, size_t)) {
 
 #if ALGORITHM_MESSAGES > 0
 	printf("\033[1;37m[A-%02zu] Creating LUF Function\033[m\n", a->id);
@@ -87,8 +78,10 @@ void compute_luf(agent *a, value **data, size_t users, size_t days, value (*wort
 
 	for (i = 0; i < luf->n; i++) {
 		SETBIT(luf->rows[i], i);
-		if (i < a->l)
+		if (i < a->l) {
 			luf->rows[i]->v = worth(vars->v, data, users, days);
+			if (!i) a->single = luf->rows[i]->v;
+		}
 		else
 			SETBIT(luf->rows[i], a->req[i - a->l]);
 
@@ -114,10 +107,11 @@ void compute_payment(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 		pthread_cond_broadcast(cond);
 		pthread_mutex_unlock(mutex);
 		a->payment = a->assignment->v;
+		active_local_variable(a);
 
 #if ALGORITHM_MESSAGES > 0
-		char *str = assignment_to_string(a);
-		printf("\033[1;36m[A-%02zu] Active Local Variables = %s\033[m\n", a->id, str);
+		char *str = variable_to_string(a->v);
+		printf("\033[1;36m[A-%02zu] Active Local Variable = %s\033[m\n", a->id, str);
 		free(str);
 #endif
 	}

@@ -242,9 +242,11 @@ void get_arg_max(agent *a) {
 	for (i = 0; i < t; i++)
 		pthread_join(threads[i], NULL);
 
+	active_local_variable(a);
+
 #if ALGORITHM_MESSAGES > 0
-	char *str = assignment_to_string(a);
-	printf("\033[1;36m[A-%02zu] Active Local Variables = %s\033[m\n", a->id, str);
+	char *str = variable_to_string(a->v);
+	printf("\033[1;36m[A-%02zu] Active Local Variable = %s\033[m\n", a->id, str);
 	free(str);
 #endif
 

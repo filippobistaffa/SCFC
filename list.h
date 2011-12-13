@@ -57,7 +57,6 @@ struct list *remove_all(struct list *h, struct list *k);
 struct list *retain_all(struct list *h, struct list *r);
 size_t index_of(struct list *h, void *i, size_t(*eq)(void *, void *));
 
-
 size_t contains_all_ordered(struct list *h, struct list *k, int(*cmp)(struct list *, struct list *));
 struct list *remove_all_ordered(struct list *h, struct list *k, int(*cmp)(struct list *, struct list *));
 struct list *retain_all_ordered(struct list *h, struct list *k, int(*cmp)(struct list *, struct list *));

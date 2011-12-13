@@ -20,15 +20,16 @@ value compute_worth(variable *v, value **data, size_t users, size_t days) {
 		w += cur * DAY_AHEAD_MARKET_COST;
 	}
 
-	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days + (list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users;
-	w = -w;
+	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days;
+	w = DAY_AHEAD_MARKET_COST * MAX_POWER_USAGE * SLOTS_PER_DAY * days * list_size(LIST(v->agents)) - w - (double)(list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users;
 
 #if WORTH_MESSAGES > 0
 	char *str = variable_to_string(v);
-	printf("\033[1;37m[INFO] W(%s) = %f\033[m\n", str, w);
+	printf("\033[1;37m[INFO] W(%s) = %f (min = %f, malus = %f)\033[m\n", str, w, min, (double)(list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users);
 	free(str);
 #endif
 
+	v->w = w;
 	return w;
 }
 
@@ -77,6 +78,7 @@ value compute_ldf(variable *v, value **data, size_t users, size_t days) {
 	free(str);
 #endif
 
+	v->w = w;
 	return w;
 }
 
