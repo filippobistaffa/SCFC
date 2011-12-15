@@ -5,10 +5,14 @@ void recursive_graph(agent *a, FILE *f) {
 	size_t i;
 
 	INDENT(0);
-	fprintf(f, "<agent>\n");
+	fprintf(f, "<agent id=\"%zu\"", a->id);
 
-	INDENT(1);
-	fprintf(f, "<id>%zu</id>\n", a->id);
+	if (a->pp || a->ch)
+		fprintf(f, ">\n");
+	else {
+		fprintf(f, "/>\n");
+		return;
+	}
 
 	if (a->pp) {
 
@@ -18,11 +22,7 @@ void recursive_graph(agent *a, FILE *f) {
 
 		while (pp) {
 			INDENT(2);
-			fprintf(f, "<agent>\n");
-			INDENT(3);
-			fprintf(f, "<id>%zu</id>\n", pp->a->id);
-			INDENT(2);
-			fprintf(f, "</agent>\n");
+			fprintf(f, "<agent id=\"%zu\"/>\n", a->id);
 			pp = pp->n;
 		}
 
@@ -58,7 +58,7 @@ void recursive_coalition(agent *a, size_t *p, FILE *f) {
 		agent_list *agents = a->v->agents;
 
 		while (agents) {
-			fprintf(f, "\t\t\t<agent payment=\"%f\" gain=\"%f\">%zu</agent>\n", agents->a->payment, agents->a->payment - agents->a->single, agents->a->id);
+			fprintf(f, "\t\t\t<agent id=\"%zu\" payment=\"%f\" gain=\"%f\"/>\n", agents->a->id, agents->a->payment, agents->a->payment - agents->a->single);
 			p[agents->a->id] = 1;
 			agents = agents->n;
 		}
