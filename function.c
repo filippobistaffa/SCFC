@@ -23,15 +23,9 @@ row *max(row **rows, size_t i, size_t j) {
 
 int compare_rows(const void *a, const void *b) {
 
-	const row *ra = *((row **) a);
-	const row *rb = *((row **) b);
-
-	size_t i;
-
-	for (i = 0; i < ra->m; i++)
-		if (ra->blocks[i] != rb->blocks[i]) return (int) ra->blocks[i] - (int) rb->blocks[i];
-
-	return 0;
+	const row *ra = *((const row **) a);
+	const row *rb = *((const row **) b);
+	return memcmp(ra->blocks, rb->blocks, ra->m * sizeof(row_block));
 }
 
 void subtract(function *f, value v) {

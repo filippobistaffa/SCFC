@@ -128,8 +128,6 @@ function *maximize(agent *a) {
 	for (i = 0; i < t; i++)
 		pthread_join(threads[i], NULL);
 
-	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
-
 	size_t h, j, p, r = a->pf->r;
 	function *max = malloc(sizeof(function));
 
@@ -138,6 +136,11 @@ function *maximize(agent *a) {
 	max->m = CEIL((float) max->n / BLOCK_BITSIZE);
 	max->vars = VAR_LIST(remove_first(copy_list(LIST(a->pf->vars)), a->l));
 	max->rows = malloc(r * sizeof(row *));
+
+	for (i = 0; i < a->pf->r; i++)
+		rows[i]->m = max->m;
+
+	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
 
 	pthread_mutex_t mutex;
 	pthread_mutex_init(&mutex, NULL);
