@@ -81,8 +81,7 @@ void compute_luf(agent *a, value **data, size_t users, size_t days, value(*worth
 		if (i < a->l) {
 			luf->rows[i]->v = worth(vars->v, data, users, days);
 			if (!i) a->single = luf->rows[i]->v;
-		}
-		else
+		} else
 			SETBIT(luf->rows[i], a->req[i - a->l]);
 
 		vars = vars->n;

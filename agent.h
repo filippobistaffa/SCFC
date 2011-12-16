@@ -42,6 +42,6 @@ char *variable_to_string(void *v);
 char *agent_to_string(void *x);
 
 void compute_payment(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex);
-void compute_luf(agent *a, value **data, size_t users, size_t days, value (*worth)(variable *, value **, size_t, size_t));
+void compute_luf(agent *a, value **data, size_t users, size_t days, value(*worth)(variable *, value **, size_t, size_t));
 
 #endif /* AGENT_H_ */
