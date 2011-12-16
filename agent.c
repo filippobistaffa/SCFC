@@ -97,13 +97,48 @@ void compute_luf(agent *a, value **data, size_t users, size_t days, value(*worth
 	a->luf = luf;
 }
 
+int local_rows_first(const void *x, const void *y) {
+
+	size_t i, m = (*((const row **) x))->m;
+	row_block *a = (*((const row **) x))->blocks;
+	row_block *b = (*((const row **) y))->blocks;
+	int c = 0, d = 0;
+
+	for (i = 0; i < m; i++) {
+
+		if (c != 1) if (a[i]) {
+			if ((a[i] & (a[i] - 1)) == 0) {
+				if (c)
+					c = 1;
+				else
+					c = -1;
+			} else
+				c = 1;
+		}
+
+		if (d != 1) if (b[i]) {
+			if ((b[i] & (b[i] - 1)) == 0) {
+				if (d)
+					d = 1;
+				else
+					d = -1;
+			} else
+				d = 1;
+		}
+	}
+
+	return c - d;
+}
+
 void compute_payment(agent *a, pthread_cond_t *cond, pthread_mutex_t *mutex) {
 
+	qsort(a->pf->rows, a->pf->r, sizeof(row *), local_rows_first);
+
 	if (a->p)
-		a->payment = max(a->pf->rows, 0, a->pf->r)->v;
+		a->payment = max(a->pf->rows, 0, a->l)->v;
 	else {
 		pthread_mutex_lock(mutex);
-		a->assignment = max(a->pf->rows, 0, a->pf->r);
+		a->assignment = max(a->pf->rows, 0, a->l);
 		pthread_cond_broadcast(cond);
 		pthread_mutex_unlock(mutex);
 		a->payment = a->assignment->v;
