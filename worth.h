@@ -18,7 +18,6 @@
  * Cost Parameters
  */
 
-#define MAX_POWER_USAGE 1
 #define FORWARD_MARKET_COST 1
 #define DAY_AHEAD_MARKET_COST 3
 

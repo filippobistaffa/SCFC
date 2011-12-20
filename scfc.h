@@ -47,7 +47,6 @@ typedef struct tuple tuple;
 
 typedef unsigned row_block;
 typedef float value;
-typedef agent item;
 
 /**
  * Header Files
