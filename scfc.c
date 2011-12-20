@@ -41,10 +41,10 @@ int main(int argc, char *argv[]) {
 	agents[r]->pt = compute_pt(agents[r]);
 	run_agents(agents, n, compute_vars);
 
-	if (!(data = read_data("/home/liquidator/20090112.csv", n, 1))) return 1;
+	if (!(data = read_data("/home/liquidator/20090112.r.csv", n, 1))) return 1;
 
 	for (i = 0; i < n; i++)
-		compute_luf(agents[i], data, n, 1, compute_ldf);
+		compute_luf(agents[i], data, n, 1, compute_worth);
 
 	free_data(data, n);
 	run_agents(agents, n, compute_scf);

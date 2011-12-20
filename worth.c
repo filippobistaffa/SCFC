@@ -21,7 +21,8 @@ value compute_worth(variable *v, value **data, size_t users, size_t days) {
 	}
 
 	w += min * (FORWARD_MARKET_COST - DAY_AHEAD_MARKET_COST) * SLOTS_PER_DAY * days;
-	w = DAY_AHEAD_MARKET_COST * MAX_POWER_USAGE * SLOTS_PER_DAY * days * list_size(LIST(v->agents)) - w - (double)(list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users;
+	w += (double)(list_size(LIST(v->agents)) - 1) * FORWARD_MARKET_COST / users;
+	w = -w;
 
 #if WORTH_MESSAGES > 0
 	char *str = variable_to_string(v);
