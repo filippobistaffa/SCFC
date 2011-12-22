@@ -2,6 +2,7 @@
 #define THREADED_H_
 
 #include "scfc.h"
+#include "cmph.h"
 #include "list.h"
 #include "compute.h"
 
