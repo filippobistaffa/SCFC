@@ -1,4 +1,4 @@
 .PHONY: 
 	
 all:
-	gcc -Ofast *.c -lpthread -o SCFC
+	gcc -Icmph -Ofast *.c -lpthread -o SCFC
