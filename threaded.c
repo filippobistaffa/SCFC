@@ -142,54 +142,17 @@ function *maximize(agent *a) {
 
 	qsort(rows, a->pf->r, sizeof(row *), compare_rows);
 
-	pthread_mutex_t mutex;
-	pthread_mutex_init(&mutex, NULL);
-
-	max_data *m_data[t];
-	h = 0, j = 0, p = 0;
-
-	for (i = 0; i <= a->pf->r; i++) {
-
-		if (!i || (i != a->pf->r && !compare_rows(&(rows[i]), &(rows[i - 1])))) continue;
-
-		m_data[j] = malloc(sizeof(max_data));
-		m_data[j]->rows = rows;
-		m_data[j]->m = &mutex;
-		m_data[j]->f = max;
-		m_data[j]->i = h;
-		m_data[j]->j = i;
-		h = i;
-		j++;
-
-		if (i == a->pf->r || j == t) {
-
-			if (p) {
-#if THREAD_MESSAGES > 1
-				printf("[MAXI] Waiting %zu Threads\n", t);
-#endif
-				for (k = 0; k < t; k++)
-					pthread_join(threads[k], NULL);
-			}
-
-#if THREAD_MESSAGES > 1
-			printf("[MAXI] Starting %zu Threads\n", j);
-#endif
-			for (k = 0; k < j; k++)
-				pthread_create(&threads[k], NULL, compute_maximize, m_data[k]);
-
-			p = 1;
-			if (i != a->pf->r) j = 0;
-		}
+	for (i = 0; i < a->pf->r; i++) {
+		if (!i || compare_rows(&(rows[i]), &(rows[i - 1]))) {
+			row *r = max->rows[max->r++] = malloc(sizeof(row));
+			r->n = max->n;
+			r->m = max->m;
+			r->v = rows[i]->v;
+			r->blocks = malloc(r->m * sizeof(row_block));
+			memcpy(r->blocks, rows[i]->blocks, r->m * sizeof(row_block));
+		} else if (rows[i]->v > max->rows[max->r - 1]->v) max->rows[max->r - 1]->v = rows[i]->v;
 	}
 
-#if THREAD_MESSAGES > 1
-	printf("[MAXI] Waiting %zu Final Threads\n", j);
-#endif
-
-	for (k = 0; k < j; k++)
-		pthread_join(threads[k], NULL);
-
-	pthread_mutex_destroy(&mutex);
 	max->rows = realloc(max->rows, max->r * sizeof(row *));
 
 	for (i = 0; i < a->pf->r; i++) {
