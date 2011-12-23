@@ -128,14 +128,13 @@ function *maximize(agent *a) {
 	for (i = 0; i < t; i++)
 		pthread_join(threads[i], NULL);
 
-	size_t h, j, p, r = a->pf->r;
 	function *max = malloc(sizeof(function));
 
 	max->r = 0;
 	max->n = a->pf->n - a->l;
 	max->m = CEIL((float) max->n / BLOCK_BITSIZE);
 	max->vars = VAR_LIST(remove_first(copy_list(LIST(a->pf->vars)), a->l));
-	max->rows = malloc(r * sizeof(row *));
+	max->rows = malloc(a->pf->r * sizeof(row *));
 
 	for (i = 0; i < a->pf->r; i++)
 		rows[i]->m = max->m;
