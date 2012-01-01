@@ -10,6 +10,7 @@ extern "C"
 #endif
 
 #include "cmph_types.h"
+#include "../function.h"
 
 typedef struct __config_t cmph_config_t;
 typedef struct __cmph_t cmph_t;
@@ -31,6 +32,7 @@ void cmph_io_nlfile_adapter_destroy(cmph_io_adapter_t * key_source);
 cmph_io_adapter_t *cmph_io_nlnkfile_adapter(FILE * keys_fd, cmph_uint32 nkeys);
 void cmph_io_nlnkfile_adapter_destroy(cmph_io_adapter_t * key_source);
 
+cmph_io_adapter_t *cmph_io_custom_vector_adapter(row ** vector, cmph_uint32 nkeys);
 cmph_io_adapter_t *cmph_io_vector_adapter(char ** vector, cmph_uint32 nkeys);
 void cmph_io_vector_adapter_destroy(cmph_io_adapter_t * key_source);
 

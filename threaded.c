@@ -160,6 +160,19 @@ function *maximize(agent *a) {
 	}
 
 	free(rows);
+	rows = malloc(max->r * sizeof(row *));
+
+	cmph_io_adapter_t *source = cmph_io_custom_vector_adapter(max->rows, max->r);
+	cmph_config_t *config = cmph_config_new(source);
+	cmph_config_set_algo(config, CMPH_CHD);
+	cmph_t *hash = cmph_new(config);
+	cmph_io_vector_adapter_destroy(source);
+
+	for (i = 0; i < max->r; i++)
+		rows[cmph_search(hash, (const char *) max->rows[i]->blocks, max->m * sizeof(row_block))] = max->rows[i];
+
+	free(max->rows);
+	max->rows = rows;
 
 #if MEMORY_MESSAGES > 0
 	printf("[MEMO] Demand Message Dimension = %zu bytes\n", size(max));
